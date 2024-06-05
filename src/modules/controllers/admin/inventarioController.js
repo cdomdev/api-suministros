@@ -1,8 +1,8 @@
 import {
-  Categoria,
   Productos,
   Inventario,
-  CategoriaPadre,
+  Subcategorias,
+  Categorias
 } from "../../models/inventaryModel.js";
 
 // Controlador para listar productos invenatario
@@ -25,11 +25,11 @@ export const listarProductos = async (req, res) => {
           attributes: ["cantidad"],
         },
         {
-          model: Categoria,
+          model: Categorias,
           attributes: ["id", "nombre"],
         },
         {
-          model: CategoriaPadre,
+          model: Subcategorias,
           attributes: ["id", "nombre"],
         },
       ],
@@ -72,11 +72,11 @@ export const actulizarStock = async (req, res) => {
             attributes: ["cantidad"],
           },
           {
-            model: Categoria,
+            model: Categorias,
             attributes: ["id", "nombre"],
           },
           {
-            model: CategoriaPadre,
+            model: Subcategorias,
             attributes: ["id", "nombre"],
           },
         ],
@@ -110,9 +110,10 @@ export const actualizarProducto = async (req, res) => {
     description,
     referencia,
     categoria_id,
-    categoria_padre_id,
+    subcategoria_id,
   } = newProduct;
 
+  console.log('este es el nuevo producto', newProduct)
   try {
     const productos = await Productos.findOne({ where: { id: producto_Id } });
     if (productos) {
@@ -124,7 +125,7 @@ export const actualizarProducto = async (req, res) => {
           description,
           referencia,
           categoria_id,
-          categoria_padre_id,
+          subcategoria_id,
         },
         { where: { id: producto_Id } }
       );
@@ -138,7 +139,7 @@ export const actualizarProducto = async (req, res) => {
           "image",
           "referencia",
           "categoria_id",
-          "categoria_padre_id",
+          "subcategoria_id",
         ],
         include: [
           {
@@ -146,11 +147,11 @@ export const actualizarProducto = async (req, res) => {
             attributes: ["cantidad"],
           },
           {
-            model: Categoria,
+            model: Categorias,
             attributes: ["id", "nombre"],
           },
           {
-            model: CategoriaPadre,
+            model: Subcategorias,
             attributes: ["id", "nombre"],
           },
         ],
@@ -172,6 +173,8 @@ export const actualizarProducto = async (req, res) => {
     });
   }
 };
+
+
 // Eliminar productos de inventario
 export const eliminarProductos = async (req, res) => {
   const { producto_Id } = req.body;
@@ -207,6 +210,7 @@ export const eliminarProductos = async (req, res) => {
         "image",
         "referencia",
         "categoria_id",
+        "subcategoria_id",
       ],
       include: [
         {
@@ -214,11 +218,11 @@ export const eliminarProductos = async (req, res) => {
           attributes: ["cantidad"],
         },
         {
-          model: Categoria,
+          model: Categorias,
           attributes: ["id", "nombre"],
         },
         {
-          model: CategoriaPadre,
+          model: Subcategorias,
           attributes: ["id", "nombre"],
         },
       ],

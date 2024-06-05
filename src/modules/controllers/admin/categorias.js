@@ -1,4 +1,4 @@
-import { Categoria, CategoriaPadre } from "../../models/inventaryModel.js";
+import { Categorias, Subcategorias} from "../../models/inventaryModel.js";
 import { generarCodigoDesdeNombre } from "../../middleware/generateCodigo.js";
 
 // Controlador para  categorias y subcategorias
@@ -12,13 +12,13 @@ export const crearCategorias = async (req, res) => {
 
       const codigo = generarCodigoDesdeNombre(nombre);
       // crear nueva categoria en la db
-      const nuevaCategoria = await CategoriaPadre.create({
+      const nuevaCategoria = await Categorias.create({
         nombre,
         codigo,
       });
       if (nuevaCategoria) {
         // procede la busqueda de toda las cotegorias
-        const categorias = await CategoriaPadre.findAll({
+        const categorias = await Categorias.findAll({
           attributes: ["id", "nombre"],
         });
         res.status(201).json({
@@ -39,7 +39,7 @@ export const crearCategorias = async (req, res) => {
 
 export const listarCategorias = async (req, res) => {
   try {
-    const categorias = await CategoriaPadre.findAll({
+    const categorias = await Categorias.findAll({
       attributes: ["id", "nombre"],
     });
     res.status(200).json({ categorias });
@@ -54,14 +54,14 @@ export const eliminarCategoria = async (req, res) => {
   const { id } = req.body;
 
   try {
-    const categoria = await CategoriaPadre.destroy({
+    const categoria = await Categorias.destroy({
       where: { id: id },
     });
 
     console.log(categoria);
 
     if (categoria) {
-      const categorias = await CategoriaPadre.findAll({
+      const categorias = await Categorias.findAll({
         attributes: ["id", "nombre"],
       });
       return res
@@ -92,16 +92,16 @@ export const crearSubcategorias = async (req, res) => {
 
       const codigo = generarCodigoDesdeNombre(nombre);
       // crear nueva categoria en la db
-      const nuevaCategoria = await Categoria.create({ nombre, codigo });
+      const nuevaCategoria = await Subcategorias.create({ nombre, codigo });
 
       // retornar las categorias
-      const subCategorias = await Categoria.findAll({
+      const subCate = await Subcategorias.findAll({
         attributes: ["id", "nombre"],
       });
-      if (subCategorias) {
+      if (subCate) {
         res.status(201).json({
           mensaje: "Categoria creada exitosamente",
-          categorias: subCategorias,
+          categorias: subCate,
         });
       }
     }
@@ -116,7 +116,7 @@ export const crearSubcategorias = async (req, res) => {
 
 export const listarSubcategorias = async (req, res) => {
   try {
-    const categorias = await Categoria.findAll({
+    const categorias = await Subcategorias.findAll({
       attributes: ["id", "nombre"],
     });
     res.status(200).json({ categorias });
@@ -130,12 +130,12 @@ export const eliminarSubcategoria = async (req, res) => {
   const { id } = req.body;
 
   try {
-    const categoriaEliminada = await Categoria.destroy({
+    const categoriaEliminada = await Subcategorias.destroy({
       where: { id: id },
     });
 
     if (categoriaEliminada) {
-      const categorias = await Categoria.findAll({
+      const categorias = await Subcategorias.findAll({
         attributes: ["id", "nombre"],
       });
       return res

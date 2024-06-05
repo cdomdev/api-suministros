@@ -1,9 +1,10 @@
 import express from "express";
 import {
   buscarProductos,
-  listarCategoriaPadre,
-  listarCategoriaProducto,
+  listarCategoria,
+  listarSubcategoria, 
   listarProductos,
+  // listarSubcategorias,
 } from "../controllers/user/productsController.js";
 import {
   finalizarCompraInvitado,
@@ -49,14 +50,13 @@ routerUser.get("/user/profile", obtenerDatosUsuario);
 // actualizar perfil
 routerUser.post("/user/profile/update", actulizarDatosDeUsuario);
 
-// listar productos
+// listar productos --- lista de todos los prorudtos, no se usa tener en cuanta <- 👀
 routerUser.get("/listar/productos", listarProductos);
 
-// Listar categoria padre con subcategorias
-routerUser.get("/categoria-padre/:codigo", listarCategoriaPadre);
-
+// Listar categoria con prodcutos
+routerUser.get("/categorias/:codigo", listarCategoria);
 // listar productos por categorias
-routerUser.get("/categorias/:codigoProducto", listarCategoriaProducto);
+routerUser.get("/subcategorias/:codigo", listarSubcategoria);
 
 // ofertas
 routerUser.get("/listar/ofertas", listarOfertasConProductos);
@@ -80,6 +80,7 @@ routerUser.post("/finish/buy/mercadopago-invited", createPreferenceInvited);
 routerUser.post("/webhooks-invited", reciveWebhookInvited);
 
 routerUser.post("/webhooks-user", reciveWebhookUser);
+
 // routerUser.post("/webhooks-invited ", reciveWebhookInvited);
 
 routerUser.get("/feedBack", feedBack);

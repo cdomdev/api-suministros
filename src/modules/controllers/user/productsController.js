@@ -2,11 +2,11 @@ import  Sequelize from "sequelize";
 import  {
   Productos,
   Inventario,
-  Categoria,
-  CategoriaPadre
+  Categorias,
+  Subcategorias
 }  from "../../models/inventaryModel.js";
 
-
+// Listar productos - inventario
 export const listarProductos = async (req, res) => {
   try {
     const productos = await Productos.findAll({
@@ -26,7 +26,7 @@ export const listarProductos = async (req, res) => {
           attributes: ["cantidad"],
         },
         {
-          model: Categoria,
+          model: Categorias,
           attributes: ["nombre"],
         },
       ],
@@ -72,62 +72,62 @@ export const buscarProductos = (req, res) => {
 };
 
 // Modulo de subcategorias
-export const listarCategoriaProducto = async (req, res) => {
-  try {
-    const { codigoProducto } = req.params;
 
-    const categoriaConProductos = await Categoria.findOne({
-      where: { codigo: codigoProducto },
-      attributes: ["id", "nombre"],
-      include: [
-        {
-          model: Productos,
-          attributes: [
-            "id",
-            "title",
-            "nombre",
-            "valor",
-            "description",
-            "image",
-            "referencia",
-          ],
-        },
-      ],
-    });
-
-    if (!categoriaConProductos) {
-      return res.status(404).json({ error: "Categoría no encontrada" });
-    }
-
-    res.json({ categoria: categoriaConProductos });
-  } catch (e) {
-    console.error(e);
-    res
-      .status(500)
-      .json({ error: "Error al obtener la categoría con productos" });
-  }
-};
-
-
-
-// Categoria padre con subcategorias y productos asociados
-export const listarCategoriaPadre = async (req, res) => {
+export const listarSubcategoria = async (req, res) => {
   try {
     const { codigo } = req.params;
+    console.log(`Código recibido: ${codigo}`);
 
     // Buscar la categoría padre por su código
-    const categoriaPadre = await CategoriaPadre.findOne({
+    const categoriasDb = await Subcategorias.findOne({
       where: { codigo },
       attributes: ["id", "nombre"],
     });
 
-    if (!categoriaPadre) {
-      return res.status(404).json({ error: "Categoría principal no encontrada" });
+    if (!categoriasDb) {
+      return res.status(404).json({ error: "Categoría no encontrada" });
     }
 
     // Buscar los productos asociados a la categoría padre
     const productos = await Productos.findAll({
-      where: { categoria_padre_id: categoriaPadre.id }, 
+      where: { subcategoria_id: categoriasDb.id }, 
+      attributes: [
+        "id",
+        "title",
+        "nombre",
+        "valor",
+        "description",
+        "image",
+        "referencia",
+      ],
+    });
+
+    res.json({ productos });
+  } catch (error) {
+    console.error("Error al obtener las subcategorías y sus productos asociados:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+};
+
+
+export const listarCategoria = async (req, res) => {
+  try {
+    const { codigo } = req.params;
+    console.log(`Código recibido: ${codigo}`);
+
+    // Buscar la categoría padre por su código
+    const categoriasDb = await Categorias.findOne({
+      where: { codigo },
+      attributes: ["id", "nombre"],
+    });
+
+    if (!categoriasDb) {
+      return res.status(404).json({ error: "Categoría no encontrada" });
+    }
+
+    // Buscar los productos asociados a la categoría padre
+    const productos = await Productos.findAll({
+      where: { categoria_id: categoriasDb.id }, 
       attributes: [
         "id",
         "title",
@@ -139,15 +139,15 @@ export const listarCategoriaPadre = async (req, res) => {
       ],
       include: [
         {
-          model: Categoria,
+          model: Subcategorias,
           attributes: ['id', 'nombre']
         }
       ]
     });
 
-    res.json({ categoriaPadre, productos });
+    res.json({ productos });
   } catch (error) {
-    console.error("Error al obtener la categoría principal y sus productos asociados:", error);
+    console.error("Error al obtener las categorías y sus productos asociados:", error);
     res.status(500).json({ error: "Error interno del servidor" });
   }
 };
@@ -155,10 +155,3 @@ export const listarCategoriaPadre = async (req, res) => {
 
 
 
-
-// module.exports = {
-//   listarProductos,
-//   listarCategoriaPadre,
-//   listarCategoriaProducto,
-//   buscarProductos,
-// };

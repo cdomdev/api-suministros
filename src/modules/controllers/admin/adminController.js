@@ -15,6 +15,7 @@ import {
 export const guardarProducto = async (req, res) => {
   try {
     const { productos } = req.body;
+    console.log(productos)
     for (const producto of productos) {
       const nuevoProducto = await Productos.create({
         title: producto.title,
@@ -22,8 +23,8 @@ export const guardarProducto = async (req, res) => {
         valor: producto.valor,
         description: producto.description,
         referencia: producto.referencia,
-        categoria_Id: producto.categoria_id,
-        categoria_padre_id: producto.categoriaPadre_id,
+        categoria_id: parseInt(producto.categoria_id),
+        subcategoria_id: parseInt(producto.subcategoria_id),
         image: producto.image,
       });
 

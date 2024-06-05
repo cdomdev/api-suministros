@@ -101,7 +101,8 @@ export const Invitado = conecction.define(
   }
 );
 
-// // // deficion de relaciones entre modelos
+
+// deficion de relaciones entre modelos
 
 // // realcion usuario - pedidos
 Pedido.belongsTo(User, { foreignKey: "usuario_id" });

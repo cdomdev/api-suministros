@@ -59,15 +59,15 @@ export const Productos = conecction.define(
         },
       },
     },
-    categoria_Id: {
+    categoria_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "Categoria",
+        model: "Categorias",
         key: "id",
       },
     },
-    categoria_padre_id: {
+    subcategoria_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
@@ -127,8 +127,8 @@ export const Inventario = conecction.define(
 
 // Modelo de categorias
 
-export const CategoriaPadre = conecction.define(
-  "categoria_padre",
+export const Categorias = conecction.define(
+  "categorias",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -156,14 +156,14 @@ export const CategoriaPadre = conecction.define(
     },
   },
   {
-    tableName: "categoria_padre",
+    tableName: "categorias",
     timestamps: true,
   }
 );
 
 // modelo de las subcategorias
-export const Categoria = conecction.define(
-  "Categoria",
+export const Subcategorias = conecction.define(
+  "subcategorias",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -191,7 +191,7 @@ export const Categoria = conecction.define(
     },
   },
   {
-    tableName: "Categoria",
+    tableName: "subcategorias",
     timestamps: true,
   }
 );
@@ -359,17 +359,19 @@ export const DetallesPedido = conecction.define(
 
 //------ Relaciones entre modelos ------
 
-// productos - categorias
-Productos.belongsTo(Categoria, { foreignKey: "categoria_id" });
+// // productos - categorias
 
+Productos.belongsTo(Categorias, { foreignKey: "categoria_id" });
 
-// Establecer la relación entre productos y categoría padre
-Productos.belongsTo(CategoriaPadre, { foreignKey: 'categoria_padre_id' });
+// Establecer la relación entre productos y categorias
+Productos.belongsTo(Subcategorias, { foreignKey: 'subcategoria_id' });
 
-
+// Relación entre Productos y Subcategorias
+Productos.belongsTo(Subcategorias, { foreignKey: 'subcategoria_id' });
+Subcategorias.hasMany(Productos, { foreignKey: 'subcategoria_id' });
 
 // categoria - productos 
-Categoria.hasMany(Productos, {foreignKey: 'categoria_id'})
+Categorias.hasMany(Productos, {foreignKey: 'categoria_id'})
 
 // relacion invetario y porductos
 Productos.hasMany(Inventario, { foreignKey: "producto_Id" });
@@ -386,13 +388,6 @@ Pedido.hasMany(DetallesPedido, { foreignKey: 'pedido_id' });
 
 DetallesPedido.belongsTo(Pedido, { foreignKey: 'pedido_id' });
 
-
-// pedidos - usuarios
-
-// Pedido.belongsTo(User, { foreignKey: 'usuario_id' });
-
-// // peidos - invitados
-//  Pedido.belongsTo(Invitado, {foreignKey: 'invitado_id'})
 
 // detalles_pedidos - productos
 DetallesPedido.belongsTo(Productos, { foreignKey: 'producto_id' });
