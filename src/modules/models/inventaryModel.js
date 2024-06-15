@@ -1,4 +1,4 @@
-import  { DataTypes, }  from "sequelize";
+import { DataTypes } from "sequelize";
 import { conecction } from "../../database/conecction.js";
 
 export const Productos = conecction.define(
@@ -48,7 +48,7 @@ export const Productos = conecction.define(
           msg: "El campo descripcion es requerido",
         },
       },
-       len:[0, 1000]
+      len: [0, 1000],
     },
     referencia: {
       type: DataTypes.STRING,
@@ -280,18 +280,6 @@ export const Pedido = conecction.define(
       allowNull: false,
       primaryKey: true,
     },
-    total: {
-      type: DataTypes.DECIMAL(10, 2),
-      allowNull: false,
-    },
-    cantidad: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    metodo_pago: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
     usuario_id: {
       type: DataTypes.INTEGER,
       allowNull: true,
@@ -300,14 +288,6 @@ export const Pedido = conecction.define(
       type: DataTypes.INTEGER,
       allowNull: true,
     },
-    estado:{
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    preference_id:{
-      type: DataTypes.STRING,
-      allowNull: true,
-    }
   },
   {
     tableName: "pedido",
@@ -345,9 +325,33 @@ export const DetallesPedido = conecction.define(
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },
+    costo_de_envio: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: true,
+    },
+    cantidad: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    estado_pedido: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    metodo_pago: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     descuento: {
       type: DataTypes.INTEGER,
       allowNull: false,
+    },
+    order_id: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    status_detail: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
   },
   {
@@ -356,58 +360,40 @@ export const DetallesPedido = conecction.define(
   }
 );
 
-
 //------ Relaciones entre modelos ------
+// Relación pedido - detalles pedido
+Pedido.hasMany(DetallesPedido, {
+  as: "detalles_pedido",
+  foreignKey: "pedido_id",
+});
 
-// // productos - categorias
+DetallesPedido.belongsTo(Pedido, { foreignKey: "pedido_id" });
 
+// detalles_pedidos - productos
+DetallesPedido.belongsTo(Productos, { foreignKey: "producto_id" });
+
+// productos - detalles_pedidos
+Productos.hasMany(DetallesPedido, { foreignKey: "producto_id" });
+
+// productos - categorias
 Productos.belongsTo(Categorias, { foreignKey: "categoria_id" });
+Categorias.hasMany(Productos, { foreignKey: "categoria_id" });
 
-// Establecer la relación entre productos y categorias
-Productos.belongsTo(Subcategorias, { foreignKey: 'subcategoria_id' });
+// productos - subcategorias
+Productos.belongsTo(Subcategorias, { foreignKey: "subcategoria_id" });
+Subcategorias.hasMany(Productos, { foreignKey: "subcategoria_id" });
 
-// Relación entre Productos y Subcategorias
-Productos.belongsTo(Subcategorias, { foreignKey: 'subcategoria_id' });
-Subcategorias.hasMany(Productos, { foreignKey: 'subcategoria_id' });
-
-// categoria - productos 
-Categorias.hasMany(Productos, {foreignKey: 'categoria_id'})
-
-// relacion invetario y porductos
+// productos - inventario
 Productos.hasMany(Inventario, { foreignKey: "producto_Id" });
 
-// productos - tabla intermediara de ofertas
+// productos - tabla intermediaria de ofertas
 Productos.belongsToMany(Ofertas, {
   through: "productos_ofertas",
   foreignKey: "id_productos",
-  onDelete: 'CASCADE'
+  onDelete: "CASCADE",
 });
-
-// relacion pedido - detalles pedido
-Pedido.hasMany(DetallesPedido, { foreignKey: 'pedido_id' });
-
-DetallesPedido.belongsTo(Pedido, { foreignKey: 'pedido_id' });
-
-
-// detalles_pedidos - productos
-DetallesPedido.belongsTo(Productos, { foreignKey: 'producto_id' });
-
-// productos - detalles_pedidos 
-Productos.hasMany(DetallesPedido, { foreignKey: 'producto_id' });
-
-// relacion pedidos - detalles de pedido
-DetallesPedido.belongsTo(Pedido, { foreignKey: "pedido_id" });
-
-// relacion entre  pedidos - productos  
-Pedido.belongsTo(Productos, { foreignKey: 'producto_id' });
-
-// relacion entre productos -  pedidos  
-Productos.hasMany(Pedido, { foreignKey: 'producto_id' });
-
-// tabla intermedia con relacion entre productos y ofertas
 Ofertas.belongsToMany(Productos, {
   through: "productos_ofertas",
   foreignKey: "id_ofertas",
-  onDelete: 'CASCADE'
+  onDelete: "CASCADE",
 });
-

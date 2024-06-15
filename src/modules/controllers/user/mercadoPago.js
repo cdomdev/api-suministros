@@ -2,12 +2,8 @@ import axios from "axios";
 import { MercadoPagoConfig, Preference } from "mercadopago";
 import { Invitado, User } from "../../models/usersModels.js";
 import { Pedido, DetallesPedido } from "../../models/inventaryModel.js";
-import {
-  calcularTotal,
-  calcularCantidad,
-  subTotal,
-} from "../../utils/valoresDeProductos.js";
-import { sendMailsCompra } from "../../../../functions/sendMailsCompra.js";
+import { createDetailsOrders } from "../../utils/createDetailsOrdes.js";
+import { sendMailsCompraMercadoPago } from "../../../../functions/sendMailsCompraMercadoPago.js";
 
 // Configura las credenciales de Mercado Pago
 const client = new MercadoPagoConfig({
@@ -16,33 +12,44 @@ const client = new MercadoPagoConfig({
 });
 
 export const createPreferenceUser = async (req, res) => {
-  const { updatedCart, data, metodoPago } = req.body;
-  const { valorTotalConEnvio, items, envio } = updatedCart;
+  const { cartItems, data, metodoPago, costoEnvio } = req.body;
 
   try {
     // Verificar que haya al menos un producto y que el valor total con envío esté definido
-    if (!items || items.length === 0 || !valorTotalConEnvio) {
+    if (!cartItems || cartItems.length === 0 || !costoEnvio) {
       return res
         .status(400)
         .json({ message: "Faltan datos para procesar el pago" });
     }
 
     // Construir el array de items para Mercado Pago
-    const mercadoPagoItems = items.map((item) => ({
+    const mercadoPagoItems = cartItems.map((item) => ({
       title: item.nombre,
       quantity: item.cantidad,
       unit_price: Number(item.valor),
     }));
 
     // Agregar el envío como un solo item al array de items para Mercado Pago
-    if (envio > 0) {
+    if (costoEnvio > 0) {
       mercadoPagoItems.push({
         title: "Costo de envío",
         quantity: 1,
-        unit_price: envio,
+        unit_price: costoEnvio,
       });
     }
+    // crear referencia de usuario en mercado pago
+    let user = await User.findOne({ where: { email: data.email } });
 
+    // crear pedido
+    const nuevoPedido = await Pedido.create({
+      invitado_id: null,
+      usuario_id: user.id,
+    });
+
+    // crear detaelles del pedido
+    createDetailsOrders(cartItems, costoEnvio, metodoPago, nuevoPedido);
+
+    // crear cuerpo de compra para mercado pago
     const body = {
       items: mercadoPagoItems,
       back_urls: {
@@ -52,62 +59,17 @@ export const createPreferenceUser = async (req, res) => {
       },
       auto_return: "approved",
       notification_url:
-        "https://7ab2-179-51-118-56.ngrok-free.app/webhooks-user",
+        "https://4b74-179-51-118-54.ngrok-free.app/webhooks-user",
+      external_reference: `${nuevoPedido.id}`,
     };
 
     const preference = new Preference(client);
     const result = await preference.create({ body });
 
-    // Validar el usuario en base de datos
-    let user = await User.findOne({ where: { email: data.email } });
-
-    if (!user) {
-      await t.rollback();
-      return res.status(404).json({ message: "Usuario no encontrado" });
-    }
-
-    // Actualizar datos del usuario si se proporcionan
-    if (data.telefono || data.direccion || data.detalles) {
-      await User.update(
-        {
-          telefono: data.telefono || user.telefono,
-          direccion: data.direccion || user.direccion,
-          detalles: data.detalles || user.detalles,
-        },
-        { where: { email: data.email } }
-      );
-    }
-
-    // Crear pedido
-    const nuevoPedido = await Pedido.create({
-      total: calcularTotal(updatedCart.items),
-      cantidad: calcularCantidad(updatedCart.items),
-      metodo_pago: metodoPago,
-      invitado_id: null,
-      usuario_id: user.id,
-      preference_id: result.id,
-    });
-
-    // Validar creación del pedido
-    if (!nuevoPedido) {
-      return res.status(501).json({ message: "Error al crear el pedido" });
-    }
-
-    // Crear detalles del pedido
-    for (const producto of updatedCart.items) {
-      await DetallesPedido.create({
-        pedido_id: nuevoPedido.id,
-        producto_id: producto.id,
-        cantidad: producto.cantidad,
-        precio_unitario: producto.valor,
-        sub_total: producto.valor * producto.cantidad,
-        total_pago: producto.valor,
-        descuento: producto.descuento | 0,
-      });
-    }
-
-    // Enviar correo electrónico usuario
-    sendMailsCompra(0, user.nombre, user.email, nuevoPedido, updatedCart.items);
+    // Enviar correo después de 1 minutos
+    setTimeout(() => {
+      sendMailsCompraMercadoPago(0, user, cartItems, costoEnvio);
+    }, 1 * 60 * 1000);
 
     res.status(200).json({
       id: result.id,
@@ -121,32 +83,30 @@ export const createPreferenceUser = async (req, res) => {
 };
 
 export const createPreferenceInvited = async (req, res) => {
-  const { updatedCart, data, metodoPago } = req.body;
-  const { valorTotalConEnvio, items, envio } = updatedCart;
+  const { cartItems, data, metodoPago, costoEnvio } = req.body;
 
   try {
     // Verificar que haya al menos un producto y que el valor total con envío esté definido
-    if (!items || items.length === 0 || !valorTotalConEnvio) {
+    if (!cartItems || cartItems.length === 0 || !costoEnvio) {
       return res
         .status(400)
         .json({ message: "Faltan datos para procesar el pago" });
     }
-    // const valorConEnvio = items.valor;
-    console.log("valor de envio", envio);
+    let user;
 
     // Construir el array de items para Mercado Pago
-    const mercadoPagoItems = items.map((item) => ({
+    const mercadoPagoItems = cartItems.map((item) => ({
       title: item.nombre,
       quantity: item.cantidad,
       unit_price: Number(item.valor),
     }));
 
     // Agregar el envío como un solo item al array de items para Mercado Pago
-    if (envio > 0) {
+    if (costoEnvio > 0) {
       mercadoPagoItems.push({
         title: "Costo de envío",
         quantity: 1,
-        unit_price: envio,
+        unit_price: costoEnvio,
       });
     }
 
@@ -159,7 +119,8 @@ export const createPreferenceInvited = async (req, res) => {
       },
       auto_return: "approved",
       notification_url:
-        "https://7ab2-179-51-118-56.ngrok-free.app/webhooks-invited",
+        "https://72eb-179-51-118-55.ngrok-free.app/webhooks-invited",
+      external_reference: `${user.id}-${nuevoPedido.id}`,
     };
 
     const preference = new Preference(client);
@@ -178,46 +139,24 @@ export const createPreferenceInvited = async (req, res) => {
       detalles: detalles,
     });
 
+    user = usuarioInvitado;
     // creacion de usuario invitado
     if (!usuarioInvitado) {
       return res.status(500).json({ message: "Error al crear el usuario" });
     }
     // crear pedido
     const nuevoPedido = await Pedido.create({
-      total: calcularTotal(updatedCart.items),
-      cantidad: calcularCantidad(updatedCart.items),
-      metodo_pago: metodoPago,
       invitado_id: usuarioInvitado.id,
       usuario_id: null,
-      id_pago_mercadopago: result.id,
     });
 
-    // validar cracion del pedido
+    // // validar cracion del pedido
     if (!nuevoPedido) {
       return res.status(401).json({ message: "Error al crear el pedido" });
     }
 
-    // crear detalles del pédido
-    for (const producto of updatedCart.items) {
-      await DetallesPedido.create({
-        pedido_id: nuevoPedido.id,
-        producto_id: producto.id,
-        cantidad: calcularCantidad(updatedCart.items),
-        precio_unitario: producto.valor,
-        sub_total: subTotal(updatedCart.items),
-        total_pago: producto.valor,
-        descuento: producto.descuento | 0,
-      });
-    }
-
-    // Enviar correo electrónico usuario
-    sendMailsCompra(
-      0,
-      usuarioInvitado.nombre,
-      usuarioInvitado.email,
-      nuevoPedido,
-      updatedCart.items
-    );
+    // crear detaelles del pedido
+    createDetailsOrders(cartItems, costoEnvio, metodoPago, nuevoPedido);
 
     res.status(200).json({
       id: result.id,
@@ -264,16 +203,23 @@ export const reciveWebhookUser = async (req, res) => {
 
     if (response.status === 200) {
       const data = response.data;
-      console.log("Información del pago:", data);
 
-      // extraer datos de la compra
-      const userId = data.payer.id;
-      const productDescription = data.description;
-      const paymentType = data.payment_type_id;
+      const { external_reference, status_detail, order } = data;
 
-      // insertar el estado del pago en la tabla detalles pedido
+      const pedidoId = Number(external_reference);
 
-      // Se ha completado el procesamiento
+      // actulizar datos de la compra
+
+      const detallesPedido = await DetallesPedido.update(
+        {
+          status_detail: status_detail,
+          order_id: order.id,
+        },
+        {
+          where: { pedido_id: pedidoId },
+        }
+      );
+
       processing = false;
 
       // Envía una respuesta 200 OK

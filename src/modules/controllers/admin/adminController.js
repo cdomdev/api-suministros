@@ -1,21 +1,17 @@
-import  {
-  User,
-  Invitado
-}from "../../models/usersModels.js";
+import { User, Invitado } from "../../models/usersModels.js";
 
 import {
   Productos,
-  Pedido, 
-  DetallesPedido, 
+  Pedido,
+  DetallesPedido,
   Inventario,
 } from "../../models/inventaryModel.js";
-
 
 // Controlador para gauradr productos
 export const guardarProducto = async (req, res) => {
   try {
     const { productos } = req.body;
-    console.log(productos)
+    console.log(productos);
     for (const producto of productos) {
       const nuevoProducto = await Productos.create({
         title: producto.title,
@@ -28,7 +24,6 @@ export const guardarProducto = async (req, res) => {
         image: producto.image,
       });
 
-    
       if (!nuevoProducto) {
         return res.status(500).json({ error: "No se pudo crear el producto" });
       }
@@ -54,23 +49,6 @@ export const guardarProducto = async (req, res) => {
       .json({ error: "Hubo un problema al procesar la solicitud" });
   }
 };
-
-
-// // Controllador para listar usuario
-// export const listarUsuarios = async (req, res) => {
-//   try {
-//     const usuarios = await User.findAll({
-//       attributes: ["id", "name", "email", "role"],
-//     });
-
-//     //Eviar usuarios en la repsuesta
-//     res.json({ usuarios });
-//   } catch (e) {
-//     console.log(e);
-//     res.status(500).json({ error: "Error al obtener usuarios" });
-//   }
-// };
-// Controlador para guardar imagenes
 
 export const saveImagenServer = (req, res) => {
   try {

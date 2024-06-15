@@ -2,7 +2,7 @@ import {
   Productos,
   Inventario,
   Subcategorias,
-  Categorias
+  Categorias,
 } from "../../models/inventaryModel.js";
 
 // Controlador para listar productos invenatario
@@ -64,7 +64,7 @@ export const actulizarStock = async (req, res) => {
           "image",
           "referencia",
           "categoria_id",
-          "categoria_padre_id",
+          "subcategori_id",
         ],
         include: [
           {
@@ -113,7 +113,7 @@ export const actualizarProducto = async (req, res) => {
     subcategoria_id,
   } = newProduct;
 
-  console.log('este es el nuevo producto', newProduct)
+  console.log("este es el nuevo producto", newProduct);
   try {
     const productos = await Productos.findOne({ where: { id: producto_Id } });
     if (productos) {
@@ -173,7 +173,6 @@ export const actualizarProducto = async (req, res) => {
     });
   }
 };
-
 
 // Eliminar productos de inventario
 export const eliminarProductos = async (req, res) => {

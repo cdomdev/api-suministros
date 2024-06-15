@@ -1,6 +1,7 @@
 import nodemailer from "nodemailer";
-
 import { formateValue } from "./formateValue.js";
+import { calcularTotal } from "../src/modules/utils/valoresDeProductos.js";
+
 const USER_MAIL = process.env.USER_FROM_MAILS;
 const PASS_MAILS = process.env.PASS_FOR_MAILS;
 
@@ -16,10 +17,9 @@ const transporter = nodemailer.createTransport({
 // Función para enviar correo de notificación
 export function sendMailsCompra(
   cualNotificacion,
-  nombre,
-  email,
-  pedido,
-  dataProducts
+  usuario,
+  dataProducts,
+  valorEnvio
 ) {
   // Definir las notificaciones
   const notificaciones = [
@@ -27,14 +27,20 @@ export function sendMailsCompra(
     // Notificacion para usuario
     {
       subject: `Nueva compra`,
-      titulo: `¡Hola ${nombre}, tu compra fue realizada con exito ! `,
+      titulo: `¡Hola ${
+        usuario.nombre || usuario.name
+      }, tu compra fue realizada con exito ! `,
       mensaje: `Acontinuacion un resumen de tu pedido`,
     },
     // notificaion para administrador
     {
       subject: "Nueva compra",
-      titulo: `¡Se realizo una nueva compra a nombre de ${nombre}!`,
-      mensaje: `Hola Admin , el usuario ${nombre} realizo nuevo pedido`,
+      titulo: `¡Se realizo una nueva compra a nombre de ${
+        usuario.nombre || usuario.name
+      }!`,
+      mensaje: `Hola Admin , el usuario ${
+        usuario.nombre || usuario.name
+      } realizo nuevo pedido`,
     },
     // Correo programado
     {
@@ -75,13 +81,15 @@ export function sendMailsCompra(
   
               <!-- Contenido principal -->
               <div style="background-color: #ffffff; padding: 5px 0px 25px 0px; width: 100%; text-align: center;;">
-                  <h2>Hola ${nombre}, aqui esta un detalle de tu pedido</h2>
+                 <h2 style="max-inline-size: 75%; margin: 20px auto 20px auto;">Hola ${
+                   usuario.nombre || usuario.name
+                 }, aqui esta un detalle de tu pedido</h2>
                   <hr style="width: 90%; margin: auto;">
                   <p style="font-weight: bold;">
                       Si vas a pagar contra entrega, ten en cuenta lo siguiente:
                   </p>
-                  <div style="width: 60%; margin: auto;">
-                      <ul style="list-style:circle; text-align: left;line-height: 25px;">
+                  <div style="width: 80%; margin: auto;">
+                      <ul style="list-style:circle; text-align: left;line-height: 25px; padding: 0;">
                           <li>Le recomendamos estar atento al teléfono por una posible llamada de la transportadora</li>
                           <li>Asegúrace de validar sus datos antes de confirmar la compra</li>
                           <li>En caso de que no puedas estar en su vivienda en el momento de la entrega, puede dejar
@@ -98,6 +106,7 @@ export function sendMailsCompra(
                           <thead style="background-color: #818ba9;">
                               <tr>
                                   <th style="border: 1px solid #ccc; padding: 8px;">Productos</th>
+                                   <th style="border: 1px solid #ccc; padding: 8px;">Cantidad</th>
                                   <th style="border: 1px solid #ccc; padding: 8px;">Valor</th>
                               </tr>
                           </thead>
@@ -109,6 +118,9 @@ export function sendMailsCompra(
                                   <td style="border: 1px solid  #ccc;">${
                                     producto.nombre
                                   }</td>
+                                  <td style="border: 1px solid #ccc;">${
+                                    producto.cantidad
+                                  } U.N</td>
                                   <td style="border: 1px solid #ccc;">${formateValue(
                                     parseInt(producto.valor)
                                   )}</td>
@@ -119,12 +131,17 @@ export function sendMailsCompra(
                           </tbody>
                           <tfoot>
                               <tr>
-                                  <td colspan="2"
+                                  <td colspan="3"
                                       style="border: 1px solid #ccc; padding: 8px; font-weight: bold; text-align: center;">
                                       Total:
-                                      ${formateValue(
-                                        parseInt(pedido.total)
-                                      )}</td>
+                                      ${
+                                        formateValue(
+                                          calcularTotal(dataProducts) +
+                                            valorEnvio
+                                        ) ||
+                                        formateValue(dataProducts.valor) +
+                                          valorEnvio
+                                      }</td>
                               </tr>
                           </tfoot>
                       </table>
@@ -208,7 +225,7 @@ export function sendMailsCompra(
   // Configuración del correo
   const mailOptions = {
     from: '"Suministros" <youremail@gmail.com>',
-    to: email,
+    to: usuario.email,
     subject: notificaciones[cualNotificacion].subject,
     text: notificaciones[cualNotificacion].notificacion,
     html: mensajeHtml,
