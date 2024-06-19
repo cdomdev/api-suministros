@@ -2,9 +2,8 @@ import express from "express";
 import {
   buscarProductos,
   listarCategoria,
-  listarSubcategoria, 
+  listarSubcategoria,
   listarProductos,
-  // listarSubcategorias,
 } from "../controllers/user/productsController.js";
 import {
   finalizarCompraInvitado,
@@ -21,17 +20,19 @@ import {
   loginController,
   resetPassword,
   registroController,
-  validateEmail
+  validateEmail,
 } from "../controllers/user/auth.js";
 
+import { feedBack, reciveWebhook } from "../controllers/user/webhooks.js";
+
 import {
-  feedBack,
   createPreferenceUser,
+  // reciveWebhookUser,
+} from "../controllers/user/createPreferenceUser.js";
+import {
   createPreferenceInvited,
-  reciveWebhookInvited,
-  reciveWebhookUser,
-  // reciveWebhook,
-} from "../controllers/user/mercadoPago.js";
+  // reciveWebhookInvited,
+} from "../controllers/user/createPreferenceInvited.js";
 
 export const routerUser = express.Router();
 
@@ -42,8 +43,8 @@ routerUser.post("/user/registro", registroController);
 // autenticacion y regsitro con google
 routerUser.post("/user/oauth-google", googleLogin);
 // restablecer contraseña
-routerUser.post('/reset-password', resetPassword);
-routerUser.post('/user/validate-email', validateEmail )
+routerUser.post("/reset-password", resetPassword);
+routerUser.post("/user/validate-email", validateEmail);
 // datos de usuario
 // perfil
 routerUser.get("/user/profile", obtenerDatosUsuario);
@@ -77,9 +78,9 @@ routerUser.post("/finish/buy/mercadopago-user", createPreferenceUser);
 
 routerUser.post("/finish/buy/mercadopago-invited", createPreferenceInvited);
 
-routerUser.post("/webhooks-invited", reciveWebhookInvited);
+routerUser.post("/webhooks-invited", reciveWebhook);
 
-routerUser.post("/webhooks-user", reciveWebhookUser);
+routerUser.post("/webhooks-user", reciveWebhook);
 
 // routerUser.post("/webhooks-invited ", reciveWebhookInvited);
 

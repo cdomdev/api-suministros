@@ -1,10 +1,10 @@
-import  Sequelize from "sequelize";
-import  {
+import Sequelize from "sequelize";
+import {
   Productos,
   Inventario,
   Categorias,
-  Subcategorias
-}  from "../../models/inventaryModel.js";
+  Subcategorias,
+} from "../../models/inventaryModel.js";
 
 // Listar productos - inventario
 export const listarProductos = async (req, res) => {
@@ -90,7 +90,7 @@ export const listarSubcategoria = async (req, res) => {
 
     // Buscar los productos asociados a la categoría padre
     const productos = await Productos.findAll({
-      where: { subcategoria_id: categoriasDb.id }, 
+      where: { subcategoria_id: categoriasDb.id },
       attributes: [
         "id",
         "title",
@@ -104,11 +104,13 @@ export const listarSubcategoria = async (req, res) => {
 
     res.json({ productos });
   } catch (error) {
-    console.error("Error al obtener las subcategorías y sus productos asociados:", error);
+    console.error(
+      "Error al obtener las subcategorías y sus productos asociados:",
+      error
+    );
     res.status(500).json({ error: "Error interno del servidor" });
   }
 };
-
 
 export const listarCategoria = async (req, res) => {
   try {
@@ -127,7 +129,7 @@ export const listarCategoria = async (req, res) => {
 
     // Buscar los productos asociados a la categoría padre
     const productos = await Productos.findAll({
-      where: { categoria_id: categoriasDb.id }, 
+      where: { categoria_id: categoriasDb.id },
       attributes: [
         "id",
         "title",
@@ -140,18 +142,17 @@ export const listarCategoria = async (req, res) => {
       include: [
         {
           model: Subcategorias,
-          attributes: ['id', 'nombre']
-        }
-      ]
+          attributes: ["id", "nombre"],
+        },
+      ],
     });
 
     res.json({ productos });
   } catch (error) {
-    console.error("Error al obtener las categorías y sus productos asociados:", error);
+    console.error(
+      "Error al obtener las categorías y sus productos asociados:",
+      error
+    );
     res.status(500).json({ error: "Error interno del servidor" });
   }
 };
-
-
-
-

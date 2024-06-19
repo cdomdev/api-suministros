@@ -1,18 +1,6 @@
-import nodemailer from "nodemailer";
 import { formateValue } from "./formateValue.js";
 import { calcularTotal } from "../src/modules/utils/valoresDeProductos.js";
-
-const USER_MAIL = process.env.USER_FROM_MAILS;
-const PASS_MAILS = process.env.PASS_FOR_MAILS;
-
-// Configuración del transporte de correos
-const transporter = nodemailer.createTransport({
-  service: "Gmail",
-  auth: {
-    user: USER_MAIL,
-    pass: PASS_MAILS,
-  },
-});
+import { transporter, mailOptionsBase } from "./transporter.js";
 
 // Función para enviar correo de notificación
 export function sendMailsCompra(
@@ -86,7 +74,7 @@ export function sendMailsCompra(
                  }, aqui esta un detalle de tu pedido</h2>
                   <hr style="width: 90%; margin: auto;">
                   <p style="font-weight: bold;">
-                      Si vas a pagar contra entrega, ten en cuenta lo siguiente:
+                      Para tu pago contra entrega, ten en cuenta lo siguiente:
                   </p>
                   <div style="width: 80%; margin: auto;">
                       <ul style="list-style:circle; text-align: left;line-height: 25px; padding: 0;">
@@ -224,17 +212,11 @@ export function sendMailsCompra(
 
   // Configuración del correo
   const mailOptions = {
-    from: '"Suministros" <youremail@gmail.com>',
+    ...mailOptionsBase,
     to: usuario.email,
     subject: notificaciones[cualNotificacion].subject,
     text: notificaciones[cualNotificacion].notificacion,
     html: mensajeHtml,
-    attachments: [
-      { filename: "fb.png", path: "./public/images//fb.png", cid: "fb" },
-      { filename: "ig.png", path: "./public/images/ig.png", cid: "ig" },
-      { filename: "wapp.png", path: "./public/images//wapp.png", cid: "wapp" },
-      { filename: "em.png", path: "./public/images/em.png", cid: "em" },
-    ],
   };
 
   // Verificar conexión y enviar correo

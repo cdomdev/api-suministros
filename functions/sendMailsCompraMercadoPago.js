@@ -73,8 +73,8 @@ export function sendMailsCompraMercadoPago(
                    usuario.nombre || usuario.name
                  }, aqui esta un detalle de tu pedido</h2>
                   <hr style="width: 90%; margin: auto;">
-                 <p style="font-weight: bold; max-inline-size: 50%; margin: 5px auto 0px auto;">
-                    Su compra atraves de marcado pago fue validada, tenga en cuenta lo siguiente
+                <p style="font-weight: bold; max-inline-size: 50% !important; margin: 5px auto 0px auto;">
+                    Su compra atraves de marcado pago fue validada. <br> tenga en cuenta lo siguiente
                 </p>
                 <div style="width: 80%; margin: auto;">
                     <ul style="list-style:circle; text-align: left;line-height: 25px; padding: 0;">
@@ -96,6 +96,7 @@ export function sendMailsCompraMercadoPago(
                               <tr>
                                   <th style="border: 1px solid #ccc; padding: 8px;">Productos</th>
                                    <th style="border: 1px solid #ccc; padding: 8px;">Cantidad</th>
+                                   <th style="border: 1px solid #ccc; padding: 8px;">Costo de envio</th>
                                   <th style="border: 1px solid #ccc; padding: 8px;">Valor</th>
                               </tr>
                           </thead>
@@ -110,6 +111,9 @@ export function sendMailsCompraMercadoPago(
                                   <td style="border: 1px solid #ccc;">${
                                     producto.cantidad
                                   } U.N</td>
+                                   <td style="border: 1px solid #ccc;">${formateValue(
+                                     costoEnvio
+                                   )}</td>
                                   <td style="border: 1px solid #ccc;">${formateValue(
                                     parseInt(producto.valor)
                                   )}</td>
@@ -120,7 +124,7 @@ export function sendMailsCompraMercadoPago(
                           </tbody>
                           <tfoot>
                               <tr>
-                                  <td colspan="3"
+                                  <td colspan="4"
                                       style="border: 1px solid #ccc; padding: 8px; font-weight: bold; text-align: center;">
                                       Total:
                                       ${formateValue(

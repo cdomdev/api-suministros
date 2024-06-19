@@ -29,8 +29,8 @@
                 <h2 style="max-inline-size: 75%; margin: 20px auto 20px auto;">Hola comprador, aqui esta un detalle de
                     tu pedido</h2>
                 <hr style="width: 90%; margin: auto;">
-                <p style="font-weight: bold; max-inline-size: 50%; margin: 5px auto 0px auto;">
-                    Su compra atraves de marcado pago fue validada, tenga en cuenta lo siguiente
+                <p style="font-weight: bold; max-inline-size: 50% !important; margin: 5px auto 0px auto;">
+                    Su compra atraves de marcado pago fue validada. <br> tenga en cuenta lo siguiente
                 </p>
                 <div style="width: 80%; margin: auto;">
                     <ul style="list-style:circle; text-align: left;line-height: 25px; padding: 0;">
@@ -51,6 +51,7 @@
                         <tr>
                             <th style="border: 1px solid #ccc; padding: 8px;">Productos</th>
                             <th style="border: 1px solid #ccc; padding: 8px;">Cantidad</th>
+                            <th style="border: 1px solid #ccc; padding: 8px;">Costo de envio</th>
                             <th style="border: 1px solid #ccc; padding: 8px;">Valor</th>
                         </tr>
                     </thead>
@@ -59,13 +60,14 @@
                         <tr>
                             <td style="border: 1px solid  #ccc;">${producto.nombre}</td>
                             <td style="border: 1px solid #ccc;">${producto.cantidad}</td>
+                            <td style="border: 1px solid #ccc;">${csoto de envio}</td>
                             <td style="border: 1px solid #ccc;">${producto.valor}</td>
                         </tr>
                         `).join('')}
                     </tbody>
                     <tfoot>
                         <tr>
-                            <td colspan="3"
+                            <td colspan="4"
                                 style="border: 1px solid #ccc; padding: 8px; font-weight: bold; text-align: center;">
                                 Total:
                                 ${pedido.total}</td>

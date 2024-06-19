@@ -103,11 +103,6 @@ export const Invitado = conecction.define(
 
 // deficion de relaciones entre modelos
 
-// // // realcion usuario - pedidos
-// Pedido.belongsTo(User, { foreignKey: "usuario_id" });
-// // //  relacion invitado - pedidos
-// // Pedido.belongsTo(Invitado, { foreignKey: "invitado_id" });
-
 User.hasMany(Pedido, { foreignKey: "usuario_id" });
 Pedido.belongsTo(User, { foreignKey: "usuario_id" });
 

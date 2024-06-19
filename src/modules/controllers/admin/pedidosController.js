@@ -88,9 +88,8 @@ export const listarPedidoPorUsuario = async (req, res) => {
             "estado_pedido",
             "descuento",
             "costo_de_envio",
-            "createdAt",
             "status_detail",
-            "order_id",
+            "createdAt",
           ],
           include: [
             {
@@ -102,14 +101,14 @@ export const listarPedidoPorUsuario = async (req, res) => {
       ],
     });
 
-    if (pedidos) {
-      res.status(200).json({ pedidos });
-    } else {
+    if (!pedidos || pedidos.length === 0) {
       res.status(404).json({ message: "El usuario no tiene pedidos" });
+    } else {
+      res.status(200).json({ pedidos });
     }
-  } catch (e) {
-    res.status(500).json({ message: "Error en el servidor", e });
-    console.log(e);
+  } catch (error) {
+    console.log("error al listar los pedidos del usuario", error);
+    res.status(500).json({ message: "Error en el servidor" });
   }
 };
 
@@ -123,6 +122,7 @@ export const listarPedidoPorInvitado = async (req, res) => {
       include: [
         {
           model: DetallesPedido,
+          as: "detalles_pedido",
           attributes: [
             "id",
             "precio_unitario",
@@ -134,6 +134,7 @@ export const listarPedidoPorInvitado = async (req, res) => {
             "estado_pedido",
             "descuento",
             "costo_de_envio",
+            "status_detail",
             "createdAt",
           ],
           include: [
@@ -146,10 +147,10 @@ export const listarPedidoPorInvitado = async (req, res) => {
       ],
     });
 
-    if (pedidos) {
-      res.status(200).json({ pedidos });
-    } else {
+    if (pedidos.length === 0 || !pedidos) {
       res.status(404).json({ message: "El usuario no tiene pedidos" });
+    } else {
+      res.status(200).json({ pedidos });
     }
   } catch (e) {
     res.status(500).json({ message: "Error en el servidor", e });

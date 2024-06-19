@@ -4,21 +4,31 @@ import {
   Productos,
 } from "../../models/inventaryModel.js";
 
+// modulo para listar datos desde el perfil de uisuario
+
 export const listarPedidoPorUsuario = async (req, res) => {
   const { id } = req.params;
 
   try {
     const pedidos = await Pedido.findAll({
       where: { usuario_id: id },
-      attributes: ["id", "cantidad", "metodo_pago", "total"],
+      attributes: ["id"],
       include: [
         {
           model: DetallesPedido,
+          as: "detalles_pedido",
           attributes: [
             "id",
             "precio_unitario",
             "sub_total",
+            "cantidad",
+            "total_pago",
+            "metodo_pago",
             "descuento",
+            "estado_pedido",
+            "descuento",
+            "costo_de_envio",
+            "status_detail",
             "createdAt",
           ],
           include: [

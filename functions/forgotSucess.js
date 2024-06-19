@@ -1,17 +1,4 @@
-import nodemailer from "nodemailer";
-
-import { formateValue } from "./formateValue.js";
-const USER_MAIL = process.env.USER_FROM_MAILS;
-const PASS_MAILS = process.env.PASS_FOR_MAILS;
-
-// Configuración del transporte de correos
-const transporter = nodemailer.createTransport({
-  service: "Gmail",
-  auth: {
-    user: USER_MAIL,
-    pass: PASS_MAILS,
-  },
-});
+import { transporter, mailOptionsBase } from "./transporter.js";
 
 // Función para enviar correo de notificación
 export function sendMailForgotSucess(nombre, email) {
@@ -138,17 +125,11 @@ export function sendMailForgotSucess(nombre, email) {
 
   // Configuración del correo
   const mailOptions = {
-    from: '"Suministros" <youremail@gmail.com>',
+    ...mailOptionsBase,
     to: email,
     subject: notificaciones[0].subject,
     text: notificaciones[0].titulo,
     html: mensajeHtml,
-    attachments: [
-      { filename: "fb.png", path: "./public/images//fb.png", cid: "fb" },
-      { filename: "ig.png", path: "./public/images/ig.png", cid: "ig" },
-      { filename: "wapp.png", path: "./public/images//wapp.png", cid: "wapp" },
-      { filename: "em.png", path: "./public/images/em.png", cid: "em" },
-    ],
   };
 
   // Verificar conexión y enviar correo
