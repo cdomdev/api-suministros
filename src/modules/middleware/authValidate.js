@@ -1,7 +1,6 @@
-import bcrypt from 'bcrypt';
-import { User }  from '../models/usersModels.js'
+import bcrypt from "bcrypt";
+import { User } from "../models/usersModels.js";
 import { OAuth2Client } from "google-auth-library";
-
 
 const CLIENT_ID = process.env.CLIENT_ID;
 const client = new OAuth2Client(CLIENT_ID);
@@ -9,7 +8,7 @@ const client = new OAuth2Client(CLIENT_ID);
 // Función para verificar si un usuario existe
 export async function userExisting(email) {
   return User.findOne({
-    where: {email: email,},
+    where: { email: email },
   });
 }
 
@@ -26,9 +25,3 @@ export async function verifyGoogleToken(token) {
   const payload = ticket.getPayload();
   return payload;
 }
-
-// module.exports = {
-//   userExisting,
-//   passwordValidate,
-//   verifyGoogleToken
-// };

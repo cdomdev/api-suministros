@@ -13,10 +13,12 @@ import { getUserDataFromGoogle } from "../../middleware/getUserDataFromGoogle.js
 import { sendMailsRegistro } from "../../../../functions/sendMailsRegistro.js";
 import { sendMailsRecover } from "../../../../functions/sendMailsRecoverPassword.js";
 import { sendMailForgotSucess } from "../../../../functions/forgotSucess.js";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+} from "../../middleware/createToken.js";
 
-const claveSecreta = process.env.CLAVE_SECRETA;
 const CLIENT_ID = process.env.CLIENT_ID;
-const tiempoExpiracion = 3600;
 
 // modulo de promisify para creacion del token
 const randomBytesAsync = promisify(crypto.randomBytes);
@@ -78,7 +80,16 @@ export const googleLogin = async (req, res) => {
 export const registroController = async (req, res) => {
   const { name, email, password } = req.body;
 
+  let clienName = name;
+  let clienEmail = email;
+
   try {
+    if (!clienName || !clienEmail || !password) {
+      res
+        .status(400)
+        .json({ message: "falatn datos para proceder con el registro" });
+    }
+
     const existingUser = await userExisting(email);
     if (existingUser) {
       return res.status(400).json({ error: "El correo ya está registrado" });
@@ -86,27 +97,19 @@ export const registroController = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await User.create({
-      name,
-      email,
+      name: name,
+      email: email,
       password: hashedPassword,
       role: "user",
     });
 
     sendMailsRegistro(newUser.name, newUser.email);
 
-    const token = jwt.sign({ user: newUser }, claveSecreta, {
-      expiresIn: 3600,
-    });
-    return res.status(201).json({
-      message: "Registro exitoso",
-      token,
-      id: newUser.id,
-      role: newUser.role,
+    res.status(201).json({
       name: newUser.name,
-      picture: newUser.picture,
       email: newUser.email,
-      direccion: newUser.direccion,
-      telefono: newUser.telefono,
+      picture: newUser.picture,
+      role: newUser.role,
     });
   } catch (error) {
     console.error("Error en el registro:", error);
@@ -115,7 +118,6 @@ export const registroController = async (req, res) => {
 };
 
 // constrolador para el login de usuarios
-
 export const loginController = async (req, res) => {
   const { email1, password } = req.body;
 
@@ -127,27 +129,43 @@ export const loginController = async (req, res) => {
         password,
         userFromDB.password
       );
+
       if (passwordMatch) {
         const { role, email, name, telefono, direccion, id } = userFromDB;
 
-        const token = jwt.sign(
-          { userId: id, email, role, name },
-          claveSecreta,
-          {
-            expiresIn: tiempoExpiracion,
-          }
-        );
-        res.status(200).json({
-          success: true,
-          message: `Inicio de sesión exitoso (${role})`,
-          name: name,
-          id: id,
-          role: role,
-          token: token,
-          email: email,
-          telefono: telefono,
-          direccion: direccion,
-        });
+        const accessToken = generateAccessToken(userFromDB);
+        const refreshToken = generateRefreshToken(userFromDB);
+
+        userFromDB.refreshToken = refreshToken;
+        await userFromDB.save();
+
+        console.log("acceess creado ----> ", accessToken);
+        console.log("refer creado con exito -----> ", refreshToken);
+        res
+          .status(200)
+          .cookie("access_token", accessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 1000 * 60 * 60, // 1hora
+          })
+          .cookie("refresh_token", refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 1000 * 60 * 60 * 24 * 7, // 7 días
+          })
+          .json({
+            success: true,
+            message: `Inicio de sesión exitoso (${role})`,
+            name: name,
+            id: id,
+            role: role,
+            email: email,
+            telefono: telefono,
+            direccion: direccion,
+            accessToken: accessToken,
+          });
       } else {
         res
           .status(401)

@@ -9,9 +9,14 @@ import {
 
 // Controlador para gauradr productos
 export const guardarProducto = async (req, res) => {
+  const { productos } = req.body;
   try {
-    const { productos } = req.body;
-    console.log(productos);
+    if (req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ success: false, message: "Acceso no autorizado" });
+    }
+
     for (const producto of productos) {
       const nuevoProducto = await Productos.create({
         title: producto.title,
@@ -40,7 +45,7 @@ export const guardarProducto = async (req, res) => {
       }
     }
     return res
-      .status(201)
+      .status(200)
       .json({ message: "Productos guardados exitosamente" });
   } catch (error) {
     console.error("Error al guardar los productos:", error);

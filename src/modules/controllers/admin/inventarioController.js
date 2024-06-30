@@ -9,6 +9,11 @@ import {
 
 export const listarProductos = async (req, res) => {
   try {
+    if (req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ success: false, message: "Acceso no autorizado" });
+    }
     const productos = await Productos.findAll({
       attributes: [
         "id",
@@ -34,7 +39,7 @@ export const listarProductos = async (req, res) => {
         },
       ],
     });
-    res.json({ productos });
+    res.status(200).json({ productos });
   } catch (e) {
     console.log(e);
     res.status(500).json({ error: "Error al obtener los productos" });
@@ -45,7 +50,14 @@ export const listarProductos = async (req, res) => {
 export const actulizarStock = async (req, res) => {
   const { producto_Id, newStock } = req.body;
 
+  console.log(req.user);
   try {
+    // validar token
+    if (req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ success: false, message: "Acceso no autorizado" });
+    }
     // BUcar el registro en la db
     const inventario = await Inventario.findOne({ where: { producto_Id } });
     if (inventario) {
@@ -64,7 +76,7 @@ export const actulizarStock = async (req, res) => {
           "image",
           "referencia",
           "categoria_id",
-          "subcategori_id",
+          "subcategoria_id",
         ],
         include: [
           {
@@ -113,8 +125,13 @@ export const actualizarProducto = async (req, res) => {
     subcategoria_id,
   } = newProduct;
 
-  console.log("este es el nuevo producto", newProduct);
   try {
+    // validar token
+    if (req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ success: false, message: "Acceso no autorizado" });
+    }
     const productos = await Productos.findOne({ where: { id: producto_Id } });
     if (productos) {
       await Productos.update(
@@ -179,6 +196,13 @@ export const eliminarProductos = async (req, res) => {
   const { producto_Id } = req.body;
 
   try {
+    // validar token
+    if (req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ success: false, message: "Acceso no autorizado" });
+    }
+
     // Eliminar el producto por su ID
     const productoEliminado = await Productos.destroy({
       where: { id: producto_Id },

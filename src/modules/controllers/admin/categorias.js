@@ -1,11 +1,17 @@
-import { Categorias, Subcategorias} from "../../models/inventaryModel.js";
+import { Categorias, Subcategorias } from "../../models/inventaryModel.js";
 import { generarCodigoDesdeNombre } from "../../middleware/generateCodigo.js";
 
 // Controlador para  categorias y subcategorias
 
 export const crearCategorias = async (req, res) => {
   const { nombre } = req.body;
+
   try {
+    if (req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ success: false, message: "Acceso no autorizado" });
+    }
     // extraer elemntos
     if (nombre) {
       // genera codigo para categoria
@@ -36,7 +42,6 @@ export const crearCategorias = async (req, res) => {
   }
 };
 
-
 export const listarCategorias = async (req, res) => {
   try {
     const categorias = await Categorias.findAll({
@@ -49,16 +54,18 @@ export const listarCategorias = async (req, res) => {
   }
 };
 
-
 export const eliminarCategoria = async (req, res) => {
   const { id } = req.body;
 
   try {
+    if (req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ success: false, message: "Acceso no autorizado" });
+    }
     const categoria = await Categorias.destroy({
       where: { id: id },
     });
-
-    console.log(categoria);
 
     if (categoria) {
       const categorias = await Categorias.findAll({
@@ -80,11 +87,15 @@ export const eliminarCategoria = async (req, res) => {
   }
 };
 
-
 // subcategorias
 
 export const crearSubcategorias = async (req, res) => {
   try {
+    if (req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ success: false, message: "Acceso no autorizado" });
+    }
     // extraer elemntos
     if (req) {
       const { nombre } = req.body;
@@ -130,6 +141,11 @@ export const eliminarSubcategoria = async (req, res) => {
   const { id } = req.body;
 
   try {
+    if (req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ success: false, message: "Acceso no autorizado" });
+    }
     const categoriaEliminada = await Subcategorias.destroy({
       where: { id: id },
     });

@@ -50,6 +50,10 @@ export const User = conecction.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    refreshToken: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     resetPasswordExpires: {
       type: DataTypes.DATE,
       allowNull: true,

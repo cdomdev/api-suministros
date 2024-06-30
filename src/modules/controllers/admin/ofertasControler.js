@@ -1,15 +1,20 @@
 // controladores para las ofertas
-import  moment from "moment";
-import  { Productos, Ofertas, Inventario } from "../../models/inventaryModel.js";
-
+import moment from "moment";
+import { Productos, Ofertas, Inventario } from "../../models/inventaryModel.js";
 
 export const crearOfetas = async (req, res) => {
   // cuerpo de la oferta
   const { nombre, descuento, productos, fechaIni, fechaFin } = req.body;
+
+  if (req.user.role !== "admin") {
+    return res
+      .status(403)
+      .json({ success: false, message: "Acceso no autorizado" });
+  }
+
   //  formetaer fechas dia-mes-anio
   const fechaInicio = moment(fechaIni, "DD-MM-YYYY").format("YYYY-MM-DD");
   const fechaFinal = moment(fechaFin, "DD-MM-YYYY").format("YYYY-MM-DD");
-
 
   //   crear la oferta
   try {
@@ -27,13 +32,13 @@ export const crearOfetas = async (req, res) => {
     const nuevasOfertas = await Ofertas.findAll({
       include: {
         model: Productos,
-        attributes: ["id", "title", "description", "referencia"],
+        attributes: ["id", "nombre", "title", "description", "referencia"],
         through: "productos_ofertas",
       },
     });
     if (nuevasOfertas) {
       return res
-        .status(200)
+        .status(201)
         .json({ message: "Oferta creada con exito", ofertas: nuevasOfertas });
     }
   } catch (error) {
@@ -67,10 +72,14 @@ export const obtenerProductos = async (req, res) => {
     });
   }
 };
-
-// listar ofertas con productos relacionados
 export const obtenerOfertasConProductos = async (req, res) => {
   try {
+    if (req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ success: false, message: "Acceso no autorizado" });
+    }
+
     const ofertas = await Ofertas.findAll({
       include: {
         model: Productos,
@@ -85,7 +94,7 @@ export const obtenerOfertasConProductos = async (req, res) => {
     return res.status(200).json({ ofertas });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ message: "Error al obetenr la oferta" });
+    return res.status(500).json({ message: "Error al obtener la oferta" });
   }
 };
 
@@ -93,7 +102,14 @@ export const obtenerOfertasConProductos = async (req, res) => {
 
 export const eliminarOferta = async (req, res) => {
   const { id } = req.body;
+
   try {
+    if (req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ success: false, message: "Acceso no autorizado" });
+    }
+
     const ofertaAElminar = await Ofertas.findByPk(id);
 
     if (!ofertaAElminar) {
@@ -106,14 +122,14 @@ export const eliminarOferta = async (req, res) => {
     const ofertas = await Ofertas.findAll({
       include: {
         model: Productos,
-        attributes: ["title", "description", "referencia"],
+        attributes: ["nombre", "title", "description", "referencia"],
         through: "productos_ofertas",
       },
     });
 
     return res.status(200).json({
-      message: "Oferta eliminada exitosamente.",
-      ofertas: ofertas,
+      message: "Oferta eliminada.",
+      ofertas,
     });
   } catch (error) {
     console.log(error);
@@ -128,7 +144,14 @@ export const actulizarOfertas = async (req, res) => {
 
   const fecha_inicio = fechaIni;
   const fecha_fin = fechaFin;
+
   try {
+    if (req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ success: false, message: "Acceso no autorizado" });
+    }
+
     const ofertaUpdate = await Ofertas.findOne({ where: oferta_id });
     if (ofertaUpdate) {
       await Ofertas.update(
@@ -136,17 +159,17 @@ export const actulizarOfertas = async (req, res) => {
         { where: { id: oferta_id } }
       );
 
-      const ofertaActualizada = await Ofertas.findByPk(oferta_id, {
+      const ofertas = await Ofertas.findAll({
         include: {
           model: Productos,
-          attributes: ["title", "description", "referencia"],
+          attributes: ["nombre", "title", "description", "referencia"],
           through: "productos_ofertas",
         },
       });
-      if (ofertaActualizada) {
+      if (ofertas) {
         return res.status(200).json({
-          message: "Oferta atualizada exitosamente.",
-          ofertas: ofertaActualizada,
+          message: "Ok",
+          ofertas,
         });
       }
     } else {

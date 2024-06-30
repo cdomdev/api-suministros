@@ -23,13 +23,8 @@ export const listarPedidoPorUsuario = async (req, res) => {
             "sub_total",
             "cantidad",
             "total_pago",
-            "metodo_pago",
-            "descuento",
             "estado_pedido",
-            "descuento",
             "costo_de_envio",
-            "status_detail",
-            "createdAt",
           ],
           include: [
             {

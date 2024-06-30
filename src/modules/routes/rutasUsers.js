@@ -22,22 +22,21 @@ import {
   registroController,
   validateEmail,
 } from "../controllers/user/auth.js";
-
+import { refreshToken } from "../controllers/user/refreshToken.js";
 import { feedBack, reciveWebhook } from "../controllers/user/webhooks.js";
 
-import {
-  createPreferenceUser,
-  // reciveWebhookUser,
-} from "../controllers/user/createPreferenceUser.js";
-import {
-  createPreferenceInvited,
-  // reciveWebhookInvited,
-} from "../controllers/user/createPreferenceInvited.js";
+import { createPreferenceUser } from "../controllers/user/createPreferenceUser.js";
+import { createPreferenceInvited } from "../controllers/user/createPreferenceInvited.js";
+import { authenticateToken } from "../middleware/authenticateToken.js";
 
 export const routerUser = express.Router();
 
 // autenticacion
 routerUser.post("/user/login", loginController);
+
+// refresh token
+
+routerUser.post("/refresh-token", refreshToken);
 // resgistro
 routerUser.post("/user/registro", registroController);
 // autenticacion y regsitro con google
@@ -49,7 +48,11 @@ routerUser.post("/user/validate-email", validateEmail);
 // perfil
 routerUser.get("/user/profile", obtenerDatosUsuario);
 // actualizar perfil
-routerUser.post("/user/profile/update", actulizarDatosDeUsuario);
+routerUser.post(
+  "/user/profile/update",
+  authenticateToken,
+  actulizarDatosDeUsuario
+);
 
 // listar productos --- lista de todos los prorudtos, no se usa tener en cuanta <- 👀
 routerUser.get("/listar/productos", listarProductos);
@@ -88,5 +91,3 @@ routerUser.get("/feedBack", feedBack);
 
 // ver pedidos
 routerUser.post("/user/listar-pedidos/:id", listarPedidoPorUsuario);
-
-// module.exports = router;

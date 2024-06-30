@@ -163,7 +163,15 @@ export const updateStateOrders = async (req, res) => {
 
   console.log(estado);
   console.log(id);
+  console.log(req.user);
+
   try {
+    if (req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ success: false, message: "Acceso no autorizado" });
+    }
+
     if (!estado || !id) {
       return res
         .status(400)

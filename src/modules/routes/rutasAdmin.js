@@ -33,51 +33,79 @@ import {
 } from "../controllers/admin/categorias.js";
 
 import express from "express";
+import { authenticateToken } from "../middleware/authenticateToken.js";
+import { logout } from "../controllers/admin/logoutAdmin.js";
 
 export const routerAdmin = express.Router();
 
 // productos guardar
-routerAdmin.post("/guardarproductos", guardarProducto);
+routerAdmin.post("/save-news-products", authenticateToken, guardarProducto);
 
 routerAdmin.post("/upload", imageUpload.array("files"), saveImagenServer);
 
 // usuarios
 
 // categorias
-routerAdmin.post("/crear/categorias", crearCategorias);
+routerAdmin.post("/categories/create", authenticateToken, crearCategorias);
 
-routerAdmin.get("/obtener/categorias", listarCategorias);
+routerAdmin.get("/categories/list", authenticateToken, listarCategorias);
 
-routerAdmin.delete("/delete/:id/categorias", eliminarCategoria);
+routerAdmin.delete(
+  "/categories/delete/:id",
+  authenticateToken,
+  eliminarCategoria
+);
 
 // subcategorias
-routerAdmin.post("/crear/sub-categoria", crearSubcategorias);
+routerAdmin.post(
+  "/subcategories/create",
+  authenticateToken,
+  crearSubcategorias
+);
+routerAdmin.get("/subcategories/list", listarSubcategorias);
 
-routerAdmin.get("/obtener/sub-categorias", listarSubcategorias);
-
-routerAdmin.delete("/delete/:id/sub-categoria", eliminarSubcategoria);
+routerAdmin.delete(
+  "/subcategories/delete/:id",
+  authenticateToken,
+  eliminarSubcategoria
+);
 
 // inventario
+routerAdmin.get("/inventary/list-products", authenticateToken, listarProductos);
 
-routerAdmin.get("/listar/productos", listarProductos);
+routerAdmin.put(
+  "/inventary/products/update-stock/:id",
+  authenticateToken,
+  actulizarStock
+);
 
-routerAdmin.put("/productos/:id/inventario", actulizarStock);
+routerAdmin.put(
+  "/inventary/products/update/:id",
+  authenticateToken,
+  actualizarProducto
+);
 
-routerAdmin.put("/productos/:id/actualizar", actualizarProducto);
-
-routerAdmin.delete("/productos/:id/eliminar", eliminarProductos);
+routerAdmin.delete(
+  "/inventary/products/delete/:id",
+  authenticateToken,
+  eliminarProductos
+);
 
 // ofertas
 
 routerAdmin.get("/productos", obtenerProductos);
 
-routerAdmin.post("/crear/ofertas", crearOfetas);
+routerAdmin.post("/crear/ofertas", authenticateToken, crearOfetas);
 
-routerAdmin.get("/listar/ofertas", obtenerOfertasConProductos);
+routerAdmin.get(
+  "/listar/ofertas",
+  authenticateToken,
+  obtenerOfertasConProductos
+);
 
-routerAdmin.delete("/oferta/:id/eliminar", eliminarOferta);
+routerAdmin.delete("/oferta/delete/:id", authenticateToken, eliminarOferta);
 
-routerAdmin.put("/oferta/:id/actualizar", actulizarOfertas);
+routerAdmin.put("/oferta/update/:id", authenticateToken, actulizarOfertas);
 
 // listar pedido
 
@@ -86,4 +114,5 @@ routerAdmin.get("/listar/invitados", listarInvitadosConPedidos);
 routerAdmin.post("/listar/pedidos-usuario/:id", listarPedidoPorUsuario);
 routerAdmin.post("/listar/pedidos-invitado/:id", listarPedidoPorInvitado);
 
-routerAdmin.post("/update/state-orders", updateStateOrders);
+routerAdmin.post("/update/state-orders", authenticateToken, updateStateOrders);
+routerAdmin.post("/logout", logout);

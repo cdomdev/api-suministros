@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import path from "path";
+import cookieParser from "cookie-parser";
 
 // instancia de express
 const app = express();
@@ -11,7 +12,18 @@ const port = process.env.PORT || 3100;
 app.use(morgan("combined"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+
+// app.use(cors());
+
+// configuracion de cors
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
+
+app.use(cookieParser());
 
 // rutas
 import { routerUser } from "./src/modules/routes/rutasUsers.js";

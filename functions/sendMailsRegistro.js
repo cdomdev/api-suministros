@@ -143,7 +143,7 @@ export function sendMailsRegistro(nombre, email) {
       return transporter.sendMail(mailOptions);
     })
     .then((info) => {
-      console.log("Correo enviado:", info);
+      console.log("Correo enviado con exito");
     })
     .catch((error) => {
       console.error("Error al enviar correo:", error);
