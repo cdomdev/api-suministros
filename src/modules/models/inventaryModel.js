@@ -80,6 +80,10 @@ export const Productos = conecction.define(
         },
       },
     },
+    sales_count: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
   },
   {
     tableName: "Productos",

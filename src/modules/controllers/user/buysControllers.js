@@ -1,7 +1,7 @@
 import { Invitado, User } from "../../models/usersModels.js";
 import { sendMailsCompra } from "../../../../functions/sendMailsCompra.js";
 import { conecction } from "../../../database/conecction.js";
-import { Pedido } from "../../models/inventaryModel.js";
+import { Pedido, Productos } from "../../models/inventaryModel.js";
 import { createDetailsOrders } from "../../utils/createDetailsOrdes.js";
 
 // controladores de compras usuarios - invitados
@@ -103,7 +103,20 @@ export const finalizarCompraUsuario = async (req, res) => {
     }
 
     // crear detalles del pedido
-    createDetailsOrders(dataProducts, valorEnvio, metodoPago, nuevoPedido);
+
+    const detalles = await createDetailsOrders(
+      dataProducts,
+      valorEnvio,
+      metodoPago,
+      nuevoPedido
+    );
+
+    for (const producto of detalles) {
+      await Productos.update(
+        { sales_count: producto.sales_count + 1 },
+        { where: { id: producto.id }, transaction: t }
+      );
+    }
 
     // Enviar correo electrónico usuario
     sendMailsCompra(0, user, dataProducts, valorEnvio);

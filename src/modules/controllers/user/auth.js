@@ -33,9 +33,9 @@ export const googleLogin = async (req, res) => {
       `https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${token}`
     );
 
-    // Verifica que el token sea válido y que pertenezca a tu cliente de Google
+    // Verifica que el token sea válido
     if (googleResponse.data.audience === CLIENT_ID) {
-      // Por ejemplo, puedes guardar el usuario en tu base de datos y generar un token JWT
+      // guardar el usuario en base de datos y generar un token JWT
       const userData = await getUserDataFromGoogle(token);
 
       // validar existencia de datos en db
@@ -54,17 +54,36 @@ export const googleLogin = async (req, res) => {
         sendMailsRegistro(userData.name, userData.email);
       }
 
-      return res.status(200).json({
-        message: "Inicio de sesion exitoso",
-        token,
-        id: user.id,
-        role: user.role,
-        name: user.name,
-        picture: user.picture,
-        email: user.email,
-        telefono: user.telefono,
-        direccion: user.direccion,
-      });
+      // crear tokens
+      const accessToken = generateAccessToken(user);
+      const refreshToken = generateRefreshToken(user);
+
+      res
+        .status(200)
+        .cookie("access_token", accessToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "strict",
+          maxAge: 1000 * 60 * 60, // 1hora
+        })
+        .cookie("refresh_token", refreshToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "strict",
+          maxAge: 1000 * 60 * 60 * 24 * 7, // 7 días
+        })
+        .json({
+          success: true,
+          message: `Inicio de sesión exitoso (${user.role})`,
+          id: user.id,
+          role: user.role,
+          name: user.name,
+          picture: user.picture,
+          email: user.email,
+          telefono: user.telefono,
+          direccion: user.direccion,
+          accessToken: accessToken,
+        });
     } else {
       // El token no es válido para tu cliente de Google
       res.status(401).json({ error: "Token de acceso no válido" });
@@ -139,8 +158,6 @@ export const loginController = async (req, res) => {
         userFromDB.refreshToken = refreshToken;
         await userFromDB.save();
 
-        console.log("acceess creado ----> ", accessToken);
-        console.log("refer creado con exito -----> ", refreshToken);
         res
           .status(200)
           .cookie("access_token", accessToken, {

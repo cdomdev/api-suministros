@@ -1,5 +1,5 @@
 import { calcularTotal, subTotal } from "./valoresDeProductos.js";
-import { DetallesPedido, Pedido } from "../models/inventaryModel.js";
+import { DetallesPedido, Pedido, Productos } from "../models/inventaryModel.js";
 
 // crear pedido
 export const createOrderAsUser = async (user) => {
@@ -39,6 +39,7 @@ export const createDetailsOrders = async (
   metodoPago,
   pedido
 ) => {
+  const productosVendidos = [];
   try {
     for (const producto of productos) {
       let totalPago = calcularTotal(productos) + envio;
@@ -61,7 +62,17 @@ export const createDetailsOrders = async (
         metodo_pago: metodoPago,
         descuento: descuento,
       });
+
+      // Buscar el producto y agregarlo al array de productos vendidos
+      const productoVendido = await Productos.findOne({
+        where: { id: productoId },
+      });
+      if (productoVendido) {
+        productosVendidos.push(productoVendido);
+      }
     }
+    // Retornar los productos vendidos
+    return productosVendidos;
   } catch (error) {
     console.log("Error al crear un pedido", error);
   }

@@ -7,13 +7,18 @@ const secretRefresToken = process.env.CLAVE_FOR_TOKEN_REFRESH;
 export const refreshToken = async (req, res) => {
   const refreshToken = req.cookies.refresh_token;
 
+  console.log("refresh ----> ", refreshToken);
   if (!refreshToken) return res.sendStatus(401);
 
   try {
-    const decoded = jwt.verify(refreshToken, secretRefresToken);
     const user = await User.findOne({ where: { refreshToken: refreshToken } });
 
     if (!user || user.refreshToken !== refreshToken) {
+      return res.status(403).json({ message: "Refresh token no válido" });
+    }
+
+    const decoded = jwt.verify(refreshToken, secretRefresToken);
+    if (!decoded) {
       return res.status(403).json({ message: "Refresh token no válido" });
     }
 

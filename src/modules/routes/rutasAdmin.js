@@ -35,6 +35,10 @@ import {
 import express from "express";
 import { authenticateToken } from "../middleware/authenticateToken.js";
 import { logout } from "../controllers/admin/logoutAdmin.js";
+import {
+  balances,
+  mostSalledsProducts,
+} from "../controllers/admin/balances.js";
 
 export const routerAdmin = express.Router();
 
@@ -116,3 +120,8 @@ routerAdmin.post("/listar/pedidos-invitado/:id", listarPedidoPorInvitado);
 
 routerAdmin.post("/update/state-orders", authenticateToken, updateStateOrders);
 routerAdmin.post("/logout", logout);
+
+// balances
+
+routerAdmin.get("/see-balance-sheets", authenticateToken, balances);
+routerAdmin.get("/see-best-sallers", authenticateToken, mostSalledsProducts);
