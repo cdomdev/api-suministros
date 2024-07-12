@@ -7,7 +7,7 @@ const secretRefresToken = process.env.CLAVE_FOR_TOKEN_REFRESH;
 export const refreshToken = async (req, res) => {
   const refreshToken = req.cookies.refresh_token;
 
-  console.log("refresh ----> ", refreshToken);
+  console.log("cabecera token --->", refreshToken);
   if (!refreshToken) return res.sendStatus(401);
 
   try {
@@ -24,6 +24,7 @@ export const refreshToken = async (req, res) => {
 
     const newAccessToken = generateAccessToken(user);
 
+    console.log("nuevo token .-----> ", newAccessToken);
     res
       .status(200)
       .cookie("access_token", newAccessToken, {

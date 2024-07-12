@@ -29,10 +29,9 @@ export const User = conecction.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    role: {
-      type: DataTypes.STRING,
+    roleUserId: {
+      type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: "user",
     },
     telefono: {
       type: DataTypes.STRING,
@@ -105,10 +104,33 @@ export const Invitado = conecction.define(
   }
 );
 
+export const Roles = conecction.define(
+  "roles",
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      allowNull: false,
+      primaryKey: true,
+    },
+    rol_name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+  },
+  {
+    tableName: "roles",
+    timestamps: false,
+  }
+);
+
 // deficion de relaciones entre modelos
 
 User.hasMany(Pedido, { foreignKey: "usuario_id" });
 Pedido.belongsTo(User, { foreignKey: "usuario_id" });
+
+Roles.hasMany(User, { foreignKey: "roleUserId", as: "usuarios" });
+User.belongsTo(Roles, { foreignKey: "roleUserId", as: "roles" });
 
 Invitado.hasMany(Pedido, { foreignKey: "invitado_id" });
 Pedido.belongsTo(Invitado, { foreignKey: "invitado_id" });

@@ -88,7 +88,6 @@ export const handleMerchantOrderNotification = async (body, res) => {
 // buscar datos del payment
 export const handlePaymentNotification = async (body, res) => {
   const paymentId = body.data.id;
-  console.log("Procesando pago con ID:", paymentId);
 
   try {
     const paymentUrl = `https://api.mercadopago.com/v1/payments/${paymentId}`;

@@ -8,7 +8,7 @@ export const listarOfertasConProductos = async (req, res) => {
         model: Productos,
         attributes: [
           "id",
-          "title",
+          "marca",
           "nombre",
           "description",
           "referencia",

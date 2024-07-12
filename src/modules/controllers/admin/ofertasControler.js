@@ -32,7 +32,7 @@ export const crearOfetas = async (req, res) => {
     const nuevasOfertas = await Ofertas.findAll({
       include: {
         model: Productos,
-        attributes: ["id", "nombre", "title", "description", "referencia"],
+        attributes: ["id", "nombre", "marca", "description", "referencia"],
         through: "productos_ofertas",
       },
     });
@@ -53,7 +53,7 @@ export const crearOfetas = async (req, res) => {
 export const obtenerProductos = async (req, res) => {
   try {
     const productos = await Productos.findAll({
-      attributes: ["id", "title", "nombre"],
+      attributes: ["id", "marca", "nombre"],
       include: [
         {
           model: Inventario,
@@ -83,7 +83,7 @@ export const obtenerOfertasConProductos = async (req, res) => {
     const ofertas = await Ofertas.findAll({
       include: {
         model: Productos,
-        attributes: ["id", "title", "nombre", "referencia"],
+        attributes: ["id", "marca", "nombre", "referencia"],
         through: "productos_ofertas",
       },
     });
@@ -122,7 +122,7 @@ export const eliminarOferta = async (req, res) => {
     const ofertas = await Ofertas.findAll({
       include: {
         model: Productos,
-        attributes: ["nombre", "title", "description", "referencia"],
+        attributes: ["id", "nombre", "marca", "description", "referencia"],
         through: "productos_ofertas",
       },
     });
@@ -162,7 +162,7 @@ export const actulizarOfertas = async (req, res) => {
       const ofertas = await Ofertas.findAll({
         include: {
           model: Productos,
-          attributes: ["nombre", "title", "description", "referencia"],
+          attributes: ["id", "nombre", "marca", "description", "referencia"],
           through: "productos_ofertas",
         },
       });

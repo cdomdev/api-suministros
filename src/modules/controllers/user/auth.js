@@ -1,10 +1,10 @@
 import axios from "axios";
 import crypto from "crypto";
-import jwt from "jsonwebtoken";
+import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcrypt";
 import { promisify } from "util";
 import { Op } from "sequelize";
-import { User } from "../../models/usersModels.js";
+import { Roles, User } from "../../models/usersModels.js";
 import {
   passwordValidate,
   userExisting,
@@ -38,18 +38,29 @@ export const googleLogin = async (req, res) => {
       // guardar el usuario en base de datos y generar un token JWT
       const userData = await getUserDataFromGoogle(token);
 
-      // validar existencia de datos en db
+      // Validar existencia de datos en db
       let user = await User.findOne({
         where: { email: userData.email },
+        include: [{ model: Roles, as: "roles" }],
       });
 
       if (!user) {
+        // Verificar si el rol de usuario ya existe
+        let roleUser = await Roles.findOne({ where: { rol_name: "user" } });
+
+        if (!roleUser) {
+          roleUser = await Roles.create({
+            role_name: "user",
+          });
+        }
+        // const hashedPasswordInvited = await bcrypt.hash(defaultPassword, 10);
+
         user = await User.create({
           name: userData.name,
           email: userData.email,
           picture: userData.picture,
           password: defaultPassword,
-          role: "user",
+          roleUserId: roleUser.id,
         });
         sendMailsRegistro(userData.name, userData.email);
       }
@@ -58,6 +69,8 @@ export const googleLogin = async (req, res) => {
       const accessToken = generateAccessToken(user);
       const refreshToken = generateRefreshToken(user);
 
+      user.refreshToken = refreshToken;
+      await user.save();
       res
         .status(200)
         .cookie("access_token", accessToken, {
@@ -74,15 +87,15 @@ export const googleLogin = async (req, res) => {
         })
         .json({
           success: true,
-          message: `Inicio de sesión exitoso (${user.role})`,
+          message: `Inicio de sesión exitoso`,
           id: user.id,
-          role: user.role,
           name: user.name,
           picture: user.picture,
           email: user.email,
           telefono: user.telefono,
           direccion: user.direccion,
           accessToken: accessToken,
+          role: user.roles.rol_name,
         });
     } else {
       // El token no es válido para tu cliente de Google
@@ -110,16 +123,19 @@ export const registroController = async (req, res) => {
     }
 
     const existingUser = await userExisting(email);
+
     if (existingUser) {
       return res.status(400).json({ error: "El correo ya está registrado" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    // crear usuario y asignar rol
     const newUser = await User.create({
       name: name,
       email: email,
       password: hashedPassword,
-      role: "user",
+      roleUserId: 2,
     });
 
     sendMailsRegistro(newUser.name, newUser.email);
@@ -128,7 +144,7 @@ export const registroController = async (req, res) => {
       name: newUser.name,
       email: newUser.email,
       picture: newUser.picture,
-      role: newUser.role,
+      roleUserId: newUser.rolUserId,
     });
   } catch (error) {
     console.error("Error en el registro:", error);
@@ -143,6 +159,7 @@ export const loginController = async (req, res) => {
   try {
     const userFromDB = await userExisting(email1);
 
+    console.log("usuario de la base de datos ----->", userFromDB);
     if (userFromDB) {
       const passwordMatch = await passwordValidate(
         password,
@@ -150,7 +167,7 @@ export const loginController = async (req, res) => {
       );
 
       if (passwordMatch) {
-        const { role, email, name, telefono, direccion, id } = userFromDB;
+        const { roleUserId, email, name, telefono, direccion, id } = userFromDB;
 
         const accessToken = generateAccessToken(userFromDB);
         const refreshToken = generateRefreshToken(userFromDB);
@@ -174,14 +191,15 @@ export const loginController = async (req, res) => {
           })
           .json({
             success: true,
-            message: `Inicio de sesión exitoso (${role})`,
+            message: `Inicio de sesión exitoso ${userFromDB.roles.rol_name}`,
             name: name,
             id: id,
-            role: role,
+            rolUserId: roleUserId,
             email: email,
             telefono: telefono,
             direccion: direccion,
             accessToken: accessToken,
+            role: userFromDB.roles.rol_name,
           });
       } else {
         res
@@ -278,5 +296,18 @@ export const resetPassword = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Error en el proceso", error });
+  }
+};
+
+export const prueba = async (req, res) => {
+  try {
+    let users = await User.findAll({
+      include: [{ model: Roles, as: "roles" }],
+    });
+
+    res.status(200).json({ users });
+  } catch (error) {
+    console.error("Error fetching users with roles: ", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };

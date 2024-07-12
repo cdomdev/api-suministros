@@ -12,7 +12,7 @@ export const listarProductos = async (req, res) => {
     const productos = await Productos.findAll({
       attributes: [
         "id",
-        "title",
+        "marca",
         "nombre",
         "valor",
         "description",
@@ -93,7 +93,7 @@ export const listarSubcategoria = async (req, res) => {
       where: { subcategoria_id: categoriasDb.id },
       attributes: [
         "id",
-        "title",
+        "marca",
         "nombre",
         "valor",
         "description",
@@ -115,7 +115,6 @@ export const listarSubcategoria = async (req, res) => {
 export const listarCategoria = async (req, res) => {
   try {
     const { codigo } = req.params;
-    console.log(`Código recibido: ${codigo}`);
 
     // Buscar la categoría padre por su código
     const categoriasDb = await Categorias.findOne({
@@ -132,7 +131,7 @@ export const listarCategoria = async (req, res) => {
       where: { categoria_id: categoriasDb.id },
       attributes: [
         "id",
-        "title",
+        "marca",
         "nombre",
         "valor",
         "description",

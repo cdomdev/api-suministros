@@ -19,7 +19,7 @@ export const guardarProducto = async (req, res) => {
 
     for (const producto of productos) {
       const nuevoProducto = await Productos.create({
-        title: producto.title,
+        marca: producto.marca,
         nombre: producto.nombre,
         valor: producto.valor,
         description: producto.description,

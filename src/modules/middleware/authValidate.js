@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import { User } from "../models/usersModels.js";
+import { Roles, User } from "../models/usersModels.js";
 import { OAuth2Client } from "google-auth-library";
 
 const CLIENT_ID = process.env.CLIENT_ID;
@@ -9,6 +9,7 @@ const client = new OAuth2Client(CLIENT_ID);
 export async function userExisting(email) {
   return User.findOne({
     where: { email: email },
+    include: [{ model: Roles, as: "roles" }],
   });
 }
 

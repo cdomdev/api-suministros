@@ -6,9 +6,10 @@ import {
 import {
   listarPedidoPorUsuario,
   listarPedidoPorInvitado,
-  listarUsuariosConPedidos,
-  listarInvitadosConPedidos,
+  // listarUsuariosConPedidos,
+  // listarInvitadosConPedidos,
   updateStateOrders,
+  listarPedidos,
 } from "../controllers/admin/pedidosController.js";
 import {
   actualizarProducto,
@@ -113,8 +114,8 @@ routerAdmin.put("/oferta/update/:id", authenticateToken, actulizarOfertas);
 
 // listar pedido
 
-routerAdmin.get("/listar/usuarios", listarUsuariosConPedidos);
-routerAdmin.get("/listar/invitados", listarInvitadosConPedidos);
+routerAdmin.get("/listar/usuarios", authenticateToken, listarPedidos);
+// routerAdmin.get("/listar/invitados", listarInvitadosConPedidos);
 routerAdmin.post("/listar/pedidos-usuario/:id", listarPedidoPorUsuario);
 routerAdmin.post("/listar/pedidos-invitado/:id", listarPedidoPorInvitado);
 

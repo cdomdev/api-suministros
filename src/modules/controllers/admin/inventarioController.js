@@ -18,7 +18,7 @@ export const listarProductos = async (req, res) => {
       attributes: [
         "id",
         "nombre",
-        "title",
+        "marca",
         "valor",
         "description",
         "image",
@@ -50,7 +50,6 @@ export const listarProductos = async (req, res) => {
 export const actulizarStock = async (req, res) => {
   const { producto_Id, newStock } = req.body;
 
-  console.log(req.user);
   try {
     // validar token
     if (req.user.role !== "admin") {
@@ -70,7 +69,7 @@ export const actulizarStock = async (req, res) => {
         attributes: [
           "id",
           "nombre",
-          "title",
+          "marca",
           "valor",
           "description",
           "image",
@@ -117,7 +116,7 @@ export const actualizarProducto = async (req, res) => {
   const { producto_Id, newProduct } = req.body;
   const {
     nombre,
-    title,
+    marca,
     valor,
     description,
     referencia,
@@ -137,7 +136,7 @@ export const actualizarProducto = async (req, res) => {
       await Productos.update(
         {
           nombre,
-          title,
+          marca,
           valor,
           description,
           referencia,
@@ -150,7 +149,7 @@ export const actualizarProducto = async (req, res) => {
         attributes: [
           "id",
           "nombre",
-          "title",
+          "marca",
           "valor",
           "description",
           "image",
@@ -195,6 +194,7 @@ export const actualizarProducto = async (req, res) => {
 export const eliminarProductos = async (req, res) => {
   const { producto_Id } = req.body;
 
+  console.log(producto_Id);
   try {
     // validar token
     if (req.user.role !== "admin") {
@@ -202,7 +202,6 @@ export const eliminarProductos = async (req, res) => {
         .status(403)
         .json({ success: false, message: "Acceso no autorizado" });
     }
-
     // Eliminar el producto por su ID
     const productoEliminado = await Productos.destroy({
       where: { id: producto_Id },
@@ -213,21 +212,17 @@ export const eliminarProductos = async (req, res) => {
         .status(404)
         .json({ message: "No se pudo encontrar el producto" });
     }
+
     // Eliminar la cantidad en inventario relacionada al producto
     const inventarioEliminado = await Inventario.destroy({
       where: { producto_Id: producto_Id },
     });
-    if (!inventarioEliminado) {
-      return res
-        .status(500)
-        .json({ message: "Error al eliminar la cantidad en inventario" });
-    }
 
     const daleteUpdate = await Productos.findAll({
       attributes: [
         "id",
         "nombre",
-        "title",
+        "marca",
         "valor",
         "description",
         "image",

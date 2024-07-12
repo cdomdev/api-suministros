@@ -1,4 +1,4 @@
-import { Invitado, User } from "../../models/usersModels.js";
+import { Roles, User, Invitado } from "../../models/usersModels.js";
 import {
   Pedido,
   DetallesPedido,
@@ -43,7 +43,14 @@ export const balances = async (req, res) => {
 
 export const usersList = async () => {
   try {
-    const users = await User.findAll();
+    const users = await User.findAll({
+      include: [
+        {
+          model: Roles,
+          as: "roles",
+        },
+      ],
+    });
     const inviteds = await Invitado.findAll();
 
     const combinedList = [...users, ...inviteds];
@@ -53,6 +60,7 @@ export const usersList = async () => {
     console.log("Error al listar usuarios e invitados", error);
   }
 };
+
 export const ordersList = async () => {
   try {
     const ordersWithDetails = await Pedido.findAll({

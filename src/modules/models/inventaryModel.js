@@ -9,7 +9,7 @@ export const Productos = conecction.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    title: {
+    marca: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {

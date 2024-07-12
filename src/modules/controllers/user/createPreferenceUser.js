@@ -46,7 +46,7 @@ export const createPreferenceUser = async (req, res) => {
       },
       auto_return: "approved",
       notification_url:
-        "https://7435-179-51-118-55.ngrok-free.app/webhooks-user",
+        "https://e20a-179-51-118-54.ngrok-free.app/webhooks-user",
       external_reference: `${nuevoPedido.id}`,
     };
 

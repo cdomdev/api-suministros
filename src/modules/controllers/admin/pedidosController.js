@@ -3,13 +3,42 @@ import {
   DetallesPedido,
   Productos,
 } from "../../models/inventaryModel.js";
-import { Invitado, User } from "../../models/usersModels.js";
+import { Invitado, Roles, User } from "../../models/usersModels.js";
 
-export const listarUsuariosConPedidos = async (req, res) => {
+export const listarPedidos = async (req, res) => {
+  try {
+    if (req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ success: false, message: "Acceso no autorizado" });
+    }
+
+    const usuariosConPedidos = await listarPedidosUsuarios();
+    const invitadosConPedidos = await listarPedidosInvitados();
+
+    // lista usuario e invitados con pedidos
+
+    const listaPedidos = [...usuariosConPedidos, ...invitadosConPedidos];
+
+    // Enviar la lista de usuarios con el indicador de pedidos en la respuesta
+    res.status(200).json({ listaPedidos: listaPedidos });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Error al obtener usuarios con pedidos" });
+  }
+};
+
+export const listarPedidosUsuarios = async () => {
   try {
     // Obtener todos los usuarios
     const usuarios = await User.findAll({
       attributes: ["id", "name", "email", "telefono", "direccion", "detalles"],
+      include: [
+        {
+          model: Roles,
+          as: "roles",
+        },
+      ],
     });
 
     // Obtener el número de pedidos para cada usuario y agregar el indicador a la respuesta
@@ -25,14 +54,14 @@ export const listarUsuariosConPedidos = async (req, res) => {
     );
 
     // Enviar la lista de usuarios con el indicador de pedidos en la respuesta
-    res.json({ usuarios: usuariosConPedidos });
+    return usuariosConPedidos;
   } catch (error) {
     console.log(error);
-    res.status(500).json({ error: "Error al obtener usuarios con pedidos" });
+    res.status(404).json({ error: "Error al obtener usuarios con pedidos" });
   }
 };
 
-export const listarInvitadosConPedidos = async (req, res) => {
+export const listarPedidosInvitados = async () => {
   try {
     // Obtener todos los usuarios
     const invitados = await Invitado.findAll({
@@ -58,11 +87,18 @@ export const listarInvitadosConPedidos = async (req, res) => {
       })
     );
 
+    // asignar rol para listado en cliente
+
+    const invitadosConPedidosMasRole = invitadosConPedidos.map((invitado) => ({
+      ...invitado,
+      role: "invitado",
+    }));
+
     // Enviar la lista de usuarios con el indicador de pedidos en la respuesta
-    res.json({ invitados: invitadosConPedidos });
+    return invitadosConPedidosMasRole;
   } catch (error) {
     console.log(error);
-    res.status(500).json({ error: "Error al obtener usuarios con pedidos" });
+    res.status(404).json({ error: "Error al obtener usuarios con pedidos" });
   }
 };
 
@@ -160,10 +196,6 @@ export const listarPedidoPorInvitado = async (req, res) => {
 
 export const updateStateOrders = async (req, res) => {
   const { estado, id } = req.body;
-
-  console.log(estado);
-  console.log(id);
-  console.log(req.user);
 
   try {
     if (req.user.role !== "admin") {

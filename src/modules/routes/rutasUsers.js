@@ -21,6 +21,7 @@ import {
   resetPassword,
   registroController,
   validateEmail,
+  prueba,
 } from "../controllers/user/auth.js";
 import { refreshToken } from "../controllers/user/refreshToken.js";
 import { feedBack, reciveWebhook } from "../controllers/user/webhooks.js";
@@ -64,7 +65,6 @@ routerUser.get("/subcategorias/:codigo", listarSubcategoria);
 
 // ofertas
 routerUser.get("/listar/ofertas", listarOfertasConProductos);
-// router.get("/obtener/ofertas", obtenerOfertasConProductos);
 
 // busqueda de prodcutos
 routerUser.post("/busqueda-productos", buscarProductos);
@@ -91,3 +91,5 @@ routerUser.get("/feedBack", feedBack);
 
 // ver pedidos
 routerUser.post("/user/listar-pedidos/:id", listarPedidoPorUsuario);
+
+routerUser.get("/prueba-user", prueba);

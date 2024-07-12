@@ -1,4 +1,4 @@
-import { Invitado, User } from "../../models/usersModels.js";
+import { User, Invitado } from "../../models/usersModels.js";
 import { sendMailsCompra } from "../../../../functions/sendMailsCompra.js";
 import { conecction } from "../../../database/conecction.js";
 import { Pedido, Productos } from "../../models/inventaryModel.js";
