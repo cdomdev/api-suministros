@@ -4,6 +4,7 @@ import {
   listarCategoria,
   listarSubcategoria,
   listarProductos,
+  masVendidos,
 } from "../controllers/user/productsController.js";
 import {
   finalizarCompraInvitado,
@@ -55,8 +56,9 @@ routerUser.post(
   actulizarDatosDeUsuario
 );
 
-// listar productos --- lista de todos los prorudtos, no se usa tener en cuanta <- 👀
-routerUser.get("/listar/productos", listarProductos);
+// routerUser.get("/listar/productos", listarProductos);
+// mas vendidos
+routerUser.get("/list-most-salleds", masVendidos);
 
 // Listar categoria con prodcutos
 routerUser.get("/categorias/:codigo", listarCategoria);

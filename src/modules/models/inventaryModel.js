@@ -84,6 +84,10 @@ export const Productos = conecction.define(
       type: DataTypes.INTEGER,
       allowNull: true,
     },
+    discount: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
   },
   {
     tableName: "Productos",

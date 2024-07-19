@@ -1,8 +1,9 @@
-import { User, Invitado } from "../../models/usersModels.js";
+import { User, Invitado, Roles } from "../../models/usersModels.js";
 import { sendMailsCompra } from "../../../../functions/sendMailsCompra.js";
 import { conecction } from "../../../database/conecction.js";
 import { Pedido, Productos } from "../../models/inventaryModel.js";
 import { createDetailsOrders } from "../../utils/createDetailsOrdes.js";
+import { createNotifications } from "../../utils/notifications.js";
 
 // controladores de compras usuarios - invitados
 
@@ -117,6 +118,8 @@ export const finalizarCompraUsuario = async (req, res) => {
         { where: { id: producto.id }, transaction: t }
       );
     }
+    // crear la notificacion de la compra
+    createNotifications(user);
 
     // Enviar correo electrónico usuario
     sendMailsCompra(0, user, dataProducts, valorEnvio);

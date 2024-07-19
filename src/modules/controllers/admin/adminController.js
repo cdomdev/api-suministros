@@ -1,11 +1,4 @@
-import { User, Invitado } from "../../models/usersModels.js";
-
-import {
-  Productos,
-  Pedido,
-  DetallesPedido,
-  Inventario,
-} from "../../models/inventaryModel.js";
+import { Productos, Inventario } from "../../models/inventaryModel.js";
 
 // Controlador para gauradr productos
 export const guardarProducto = async (req, res) => {

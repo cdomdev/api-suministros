@@ -29,7 +29,7 @@ export const User = conecction.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    roleUserId: {
+    rol_user_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
@@ -104,6 +104,30 @@ export const Invitado = conecction.define(
   }
 );
 
+export const Notifcaciones = conecction.define(
+  "notificaciones",
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      allowNull: false,
+      primaryKey: true,
+    },
+    mensaje: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    leido: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+  },
+  {
+    tableName: "notificaciones",
+    timestamps: true,
+  }
+);
+
 export const Roles = conecction.define(
   "roles",
   {
@@ -129,8 +153,8 @@ export const Roles = conecction.define(
 User.hasMany(Pedido, { foreignKey: "usuario_id" });
 Pedido.belongsTo(User, { foreignKey: "usuario_id" });
 
-Roles.hasMany(User, { foreignKey: "roleUserId", as: "usuarios" });
-User.belongsTo(Roles, { foreignKey: "roleUserId", as: "roles" });
+Roles.hasMany(User, { foreignKey: "rol_user_id", as: "usuarios" });
+User.belongsTo(Roles, { foreignKey: "rol_user_id", as: "roles" });
 
 Invitado.hasMany(Pedido, { foreignKey: "invitado_id" });
 Pedido.belongsTo(Invitado, { foreignKey: "invitado_id" });

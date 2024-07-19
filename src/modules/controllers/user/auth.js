@@ -1,6 +1,5 @@
 import axios from "axios";
 import crypto from "crypto";
-import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcrypt";
 import { promisify } from "util";
 import { Op } from "sequelize";
@@ -50,7 +49,7 @@ export const googleLogin = async (req, res) => {
 
         if (!roleUser) {
           roleUser = await Roles.create({
-            role_name: "user",
+            rol_name: "user",
           });
         }
         // const hashedPasswordInvited = await bcrypt.hash(defaultPassword, 10);
@@ -60,7 +59,7 @@ export const googleLogin = async (req, res) => {
           email: userData.email,
           picture: userData.picture,
           password: defaultPassword,
-          roleUserId: roleUser.id,
+          rol_user_id: roleUser.id,
         });
         sendMailsRegistro(userData.name, userData.email);
       }
@@ -159,7 +158,6 @@ export const loginController = async (req, res) => {
   try {
     const userFromDB = await userExisting(email1);
 
-    console.log("usuario de la base de datos ----->", userFromDB);
     if (userFromDB) {
       const passwordMatch = await passwordValidate(
         password,
@@ -167,7 +165,8 @@ export const loginController = async (req, res) => {
       );
 
       if (passwordMatch) {
-        const { roleUserId, email, name, telefono, direccion, id } = userFromDB;
+        const { rol_user_id, email, name, telefono, direccion, id } =
+          userFromDB;
 
         const accessToken = generateAccessToken(userFromDB);
         const refreshToken = generateRefreshToken(userFromDB);
@@ -194,7 +193,7 @@ export const loginController = async (req, res) => {
             message: `Inicio de sesión exitoso ${userFromDB.roles.rol_name}`,
             name: name,
             id: id,
-            rolUserId: roleUserId,
+            rol_user_id: rol_user_id,
             email: email,
             telefono: telefono,
             direccion: direccion,

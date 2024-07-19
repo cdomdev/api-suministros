@@ -137,6 +137,7 @@ export const listarCategoria = async (req, res) => {
         "description",
         "image",
         "referencia",
+        "discount",
       ],
       include: [
         {
@@ -153,5 +154,20 @@ export const listarCategoria = async (req, res) => {
       error
     );
     res.status(500).json({ error: "Error interno del servidor" });
+  }
+};
+
+export const masVendidos = async (req, res) => {
+  try {
+    // Obtener los productos más vendidos
+    const products = await Productos.findAll({
+      order: [["sales_count", "DESC"]],
+      limit: 4,
+    });
+
+    // Enviar la lista de productos
+    return res.status(200).json({ data: products });
+  } catch (error) {
+    console.log("Error al obtener las lista de productos mas vendidos", error);
   }
 };

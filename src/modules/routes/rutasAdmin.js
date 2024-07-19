@@ -40,6 +40,11 @@ import {
   balances,
   mostSalledsProducts,
 } from "../controllers/admin/balances.js";
+import {
+  deleteNotifications,
+  notificationList,
+  tickRead,
+} from "../controllers/admin/notificationsAdmin.js";
 
 export const routerAdmin = express.Router();
 
@@ -126,3 +131,14 @@ routerAdmin.post("/logout", logout);
 
 routerAdmin.get("/see-balance-sheets", authenticateToken, balances);
 routerAdmin.get("/see-best-sallers", authenticateToken, mostSalledsProducts);
+
+// notificaciones
+
+routerAdmin.get("/notifications-admin", authenticateToken, notificationList);
+routerAdmin.post(
+  "/delete-nofitication/:id",
+  authenticateToken,
+  deleteNotifications
+);
+
+routerAdmin.post("/tick-read/:id", authenticateToken, tickRead);

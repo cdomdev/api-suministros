@@ -12,9 +12,18 @@ export const crearOfetas = async (req, res) => {
       .json({ success: false, message: "Acceso no autorizado" });
   }
 
+  console.log(productos);
   //  formetaer fechas dia-mes-anio
   const fechaInicio = moment(fechaIni, "DD-MM-YYYY").format("YYYY-MM-DD");
   const fechaFinal = moment(fechaFin, "DD-MM-YYYY").format("YYYY-MM-DD");
+
+  // aregar el valor de las ofertas a cada producto
+
+  if (productos && productos.length > 0) {
+    for (const id of productos) {
+      await Productos.update({ discount: descuento }, { where: { id: id } });
+    }
+  }
 
   //   crear la oferta
   try {
@@ -36,11 +45,10 @@ export const crearOfetas = async (req, res) => {
         through: "productos_ofertas",
       },
     });
-    if (nuevasOfertas) {
-      return res
-        .status(201)
-        .json({ message: "Oferta creada con exito", ofertas: nuevasOfertas });
-    }
+
+    return res
+      .status(201)
+      .json({ message: "Oferta creada con éxito", ofertas: nuevasOfertas });
   } catch (error) {
     console.log(error);
     return res
