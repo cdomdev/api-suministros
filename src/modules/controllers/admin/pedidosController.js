@@ -3,6 +3,7 @@ import {
   DetallesPedido,
   Productos,
 } from "../../models/inventaryModel.js";
+import { Op } from "sequelize";
 import { Invitado, Roles, User } from "../../models/usersModels.js";
 
 export const listarPedidos = async (req, res) => {
@@ -46,6 +47,12 @@ export const listarPedidosUsuarios = async () => {
       usuarios.map(async (usuario) => {
         const numPedidos = await Pedido.count({
           where: { usuario_id: usuario.id },
+          include: [
+            {
+              model: DetallesPedido,
+              as: "detalles_pedido",
+            },
+          ],
         });
 
         // Agregar un indicador al usuario para mostrar si tiene pedidos o no
@@ -80,6 +87,12 @@ export const listarPedidosInvitados = async () => {
       invitados.map(async (invitado) => {
         const numPedidos = await Pedido.count({
           where: { invitado_id: invitado.id },
+          include: [
+            {
+              model: DetallesPedido,
+              as: "detalles_pedido",
+            },
+          ],
         });
 
         // Agregar un indicador al usuario para mostrar si tiene pedidos o no
@@ -137,10 +150,26 @@ export const listarPedidoPorUsuario = async (req, res) => {
       ],
     });
 
-    if (!pedidos || pedidos.length === 0) {
+    // // Filtrar los detalles de pedido con estado "entregado"
+    // const pedidosFiltrados = pedidos.map((pedido) => {
+    //   const detallesFiltrados = pedido.detalles_pedido.filter(
+    //     (detalle) => detalle.estado_pedido !== "entregado"
+    //   );
+    //   return {
+    //     ...pedido.toJSON(),
+    //     detalles_pedido: detallesFiltrados,
+    //   };
+    // });
+
+    // // Excluir pedidos que no tienen detalles después del filtrado
+    // const pedidosConDetalles = pedidosFiltrados.filter(
+    //   (pedido) => pedido.detalles_pedido.length > 0
+    // );
+
+    if (pedidos.length === 0) {
       res.status(404).json({ message: "El usuario no tiene pedidos" });
     } else {
-      res.status(200).json({ pedidos });
+      res.status(200).json({ pedidos: pedidos });
     }
   } catch (error) {
     console.log("error al listar los pedidos del usuario", error);
@@ -153,7 +182,9 @@ export const listarPedidoPorInvitado = async (req, res) => {
 
   try {
     const pedidos = await Pedido.findAll({
-      where: { invitado_id: id },
+      where: {
+        invitado_id: id,
+      },
       attributes: ["id"],
       include: [
         {
@@ -183,10 +214,26 @@ export const listarPedidoPorInvitado = async (req, res) => {
       ],
     });
 
-    if (pedidos.length === 0 || !pedidos) {
+    // // Filtrar los detalles de pedido con estado "entregado"
+    // const pedidosFiltrados = pedidos.map((pedido) => {
+    //   const detallesFiltrados = pedido.detalles_pedido.filter(
+    //     (detalle) => detalle.estado_pedido !== "entregado"
+    //   );
+    //   return {
+    //     ...pedido.toJSON(),
+    //     detalles_pedido: detallesFiltrados,
+    //   };
+    // });
+
+    // // Excluir pedidos que no tienen detalles después del filtrado
+    // const pedidosConDetalles = pedidosFiltrados.filter(
+    //   (pedido) => pedido.detalles_pedido.length > 0
+    // );
+
+    if (pedidos.length === 0) {
       res.status(404).json({ message: "El usuario no tiene pedidos" });
     } else {
-      res.status(200).json({ pedidos });
+      res.status(200).json({ pedidos: pedidosConDetalles });
     }
   } catch (e) {
     res.status(500).json({ message: "Error en el servidor", e });

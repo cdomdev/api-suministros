@@ -11,9 +11,14 @@ import { createItemsMercadoPago } from "../../utils/itesmProcessMercadoPago.js";
 export const createPreferenceUser = async (req, res) => {
   const { cartItems, data, metodoPago, costoEnvio } = req.body;
 
+  console.log("producto--_> ", cartItems.length);
+  console.log("datos del usuario--_>", data);
+  console.log("metodo de pago --->", metodoPago);
+  console.log("costo --->", costoEnvio);
+
   try {
     // Verificar que haya al menos un producto y que el valor total con envío esté definido
-    if (!cartItems || cartItems.length === 0 || !costoEnvio) {
+    if (!cartItems || cartItems.length === 0) {
       return res
         .status(400)
         .json({ message: "Faltan datos para procesar el pago" });
@@ -46,7 +51,7 @@ export const createPreferenceUser = async (req, res) => {
       },
       auto_return: "approved",
       notification_url:
-        "https://e20a-179-51-118-54.ngrok-free.app/webhooks-user",
+        "https://3e75-191-156-50-109.ngrok-free.app/webhooks-user",
       external_reference: `${nuevoPedido.id}`,
     };
 

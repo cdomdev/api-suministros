@@ -54,7 +54,7 @@ export const createPreferenceInvited = async (req, res) => {
       },
       auto_return: "approved",
       notification_url:
-        "https://e20a-179-51-118-54.ngrok-free.app/webhooks-invited",
+        "https://3e75-191-156-50-109.ngrok-free.app/webhooks-invited",
       external_reference: `${nuevoPedido.id}`,
     };
 
