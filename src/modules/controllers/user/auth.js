@@ -134,7 +134,7 @@ export const registroController = async (req, res) => {
       name: name,
       email: email,
       password: hashedPassword,
-      roleUserId: 2,
+      rol_user_id: 2,
     });
 
     sendMailsRegistro(newUser.name, newUser.email);
@@ -143,7 +143,7 @@ export const registroController = async (req, res) => {
       name: newUser.name,
       email: newUser.email,
       picture: newUser.picture,
-      roleUserId: newUser.rolUserId,
+      rol_user_id: newUser.rolUserId,
     });
   } catch (error) {
     console.error("Error en el registro:", error);
