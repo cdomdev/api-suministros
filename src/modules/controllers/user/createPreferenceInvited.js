@@ -38,12 +38,13 @@ export const createPreferenceInvited = async (req, res) => {
     // Crear pedido
     let nuevoPedido = await createOrderAsGuest(user);
 
-    // crear detaelles del pedido
-    createDetailsOrders(cartItems, costoEnvio, metodoPago, nuevoPedido);
     // // validar cracion del pedido
     if (!nuevoPedido) {
       return res.status(400).json({ message: "Error al crear el pedido" });
     }
+
+    // crear detaelles del pedido
+    createDetailsOrders(cartItems, costoEnvio, metodoPago, nuevoPedido);
 
     const body = {
       items: mercadoPagoItems,

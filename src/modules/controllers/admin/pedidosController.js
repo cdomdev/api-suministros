@@ -3,7 +3,6 @@ import {
   DetallesPedido,
   Productos,
 } from "../../models/inventaryModel.js";
-import { Op } from "sequelize";
 import { Invitado, Roles, User } from "../../models/usersModels.js";
 
 export const listarPedidos = async (req, res) => {
@@ -43,21 +42,9 @@ export const listarPedidosUsuarios = async () => {
     });
 
     // Obtener el número de pedidos para cada usuario y agregar el indicador a la respuesta
-    const usuariosConPedidos = await Promise.all(
-      usuarios.map(async (usuario) => {
-        const numPedidos = await Pedido.count({
-          where: { usuario_id: usuario.id },
-          include: [
-            {
-              model: DetallesPedido,
-              as: "detalles_pedido",
-            },
-          ],
-        });
-
-        // Agregar un indicador al usuario para mostrar si tiene pedidos o no
-        return { ...usuario.toJSON(), tienePedidos: numPedidos > 0 };
-      })
+    const usuariosConPedidos = await listUsersWithOrders(
+      usuarios,
+      "usuario_id"
     );
 
     // Enviar la lista de usuarios con el indicador de pedidos en la respuesta
@@ -83,21 +70,9 @@ export const listarPedidosInvitados = async () => {
     });
 
     // Obtener el número de pedidos para cada usuario y agregar el indicador a la respuesta
-    const invitadosConPedidos = await Promise.all(
-      invitados.map(async (invitado) => {
-        const numPedidos = await Pedido.count({
-          where: { invitado_id: invitado.id },
-          include: [
-            {
-              model: DetallesPedido,
-              as: "detalles_pedido",
-            },
-          ],
-        });
-
-        // Agregar un indicador al usuario para mostrar si tiene pedidos o no
-        return { ...invitado.toJSON(), tienePedidos: numPedidos > 0 };
-      })
+    const invitadosConPedidos = await listUsersWithOrders(
+      invitados,
+      "invitado_id"
     );
 
     // asignar rol para listado en cliente
@@ -117,60 +92,14 @@ export const listarPedidosInvitados = async () => {
 
 export const listarPedidoPorUsuario = async (req, res) => {
   const { id } = req.params;
-
+  let condicion = { usuario_id: id };
   try {
-    const pedidos = await Pedido.findAll({
-      where: { usuario_id: id },
-      attributes: ["id"],
-      include: [
-        {
-          model: DetallesPedido,
-          as: "detalles_pedido",
-          attributes: [
-            "id",
-            "precio_unitario",
-            "sub_total",
-            "cantidad",
-            "total_pago",
-            "metodo_pago",
-            "descuento",
-            "estado_pedido",
-            "descuento",
-            "costo_de_envio",
-            "status_detail",
-            "createdAt",
-          ],
-          include: [
-            {
-              model: Productos,
-              attributes: ["id", "nombre", "image", "referencia", "valor"],
-            },
-          ],
-        },
-      ],
-    });
-
-    // // Filtrar los detalles de pedido con estado "entregado"
-    // const pedidosFiltrados = pedidos.map((pedido) => {
-    //   const detallesFiltrados = pedido.detalles_pedido.filter(
-    //     (detalle) => detalle.estado_pedido !== "entregado"
-    //   );
-    //   return {
-    //     ...pedido.toJSON(),
-    //     detalles_pedido: detallesFiltrados,
-    //   };
-    // });
-
-    // // Excluir pedidos que no tienen detalles después del filtrado
-    // const pedidosConDetalles = pedidosFiltrados.filter(
-    //   (pedido) => pedido.detalles_pedido.length > 0
-    // );
-
+    const pedidos = await listOrders(condicion);
     if (pedidos.length === 0) {
       res.status(404).json({ message: "El usuario no tiene pedidos" });
-    } else {
-      res.status(200).json({ pedidos: pedidos });
     }
+
+    res.status(200).json({ pedidos: pedidos });
   } catch (error) {
     console.log("error al listar los pedidos del usuario", error);
     res.status(500).json({ message: "Error en el servidor" });
@@ -180,11 +109,25 @@ export const listarPedidoPorUsuario = async (req, res) => {
 export const listarPedidoPorInvitado = async (req, res) => {
   const { id } = req.params;
 
+  let condicion = { invitado_id: id };
+
+  try {
+    const pedidos = await listOrders(condicion);
+    if (pedidos.length === 0) {
+      res.status(404).json({ message: "El usuario no tiene pedidos" });
+    }
+
+    res.status(200).json({ pedidos: pedidos });
+  } catch (e) {
+    res.status(500).json({ message: "Error en el servidor", e });
+    console.log(e);
+  }
+};
+
+const listOrders = async (res, condicion) => {
   try {
     const pedidos = await Pedido.findAll({
-      where: {
-        invitado_id: id,
-      },
+      where: condicion,
       attributes: ["id"],
       include: [
         {
@@ -214,31 +157,35 @@ export const listarPedidoPorInvitado = async (req, res) => {
       ],
     });
 
-    // // Filtrar los detalles de pedido con estado "entregado"
-    // const pedidosFiltrados = pedidos.map((pedido) => {
-    //   const detallesFiltrados = pedido.detalles_pedido.filter(
-    //     (detalle) => detalle.estado_pedido !== "entregado"
-    //   );
-    //   return {
-    //     ...pedido.toJSON(),
-    //     detalles_pedido: detallesFiltrados,
-    //   };
-    // });
-
-    // // Excluir pedidos que no tienen detalles después del filtrado
-    // const pedidosConDetalles = pedidosFiltrados.filter(
-    //   (pedido) => pedido.detalles_pedido.length > 0
-    // );
-
-    if (pedidos.length === 0) {
-      res.status(404).json({ message: "El usuario no tiene pedidos" });
-    } else {
-      res.status(200).json({ pedidos: pedidosConDetalles });
+    if (!pedidos) {
+      res.status(400).json({
+        message:
+          "Error al obtener el listado de pedidos en la funcion listOrders",
+      });
     }
-  } catch (e) {
-    res.status(500).json({ message: "Error en el servidor", e });
-    console.log(e);
+
+    return pedidos;
+  } catch (error) {
+    console.log("Erro al listar los pedidos, en la funcion listOrders", error);
   }
+};
+
+const listUsersWithOrders = async (users, conditionKey) => {
+  return await Promise.all(
+    users.map(async (user) => {
+      const numPedidos = await Pedido.count({
+        where: { [conditionKey]: user.id },
+        include: [
+          {
+            model: DetallesPedido,
+            as: "detalles_pedido",
+          },
+        ],
+      });
+
+      return { ...user.toJSON(), tienePedidos: numPedidos > 0 };
+    })
+  );
 };
 
 export const updateStateOrders = async (req, res) => {
