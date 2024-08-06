@@ -3,19 +3,15 @@ import cors from "cors";
 import morgan from "morgan";
 import path from "path";
 import cookieParser from "cookie-parser";
+import { fileURLToPath } from "url";
 
-// instancia de express
 const app = express();
 const port = process.env.PORT || 3100;
 
-// Formateo
 app.use(morgan("combined"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// app.use(cors());
-
-// configuracion de cors
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -25,11 +21,10 @@ app.use(
 
 app.use(cookieParser());
 
-// rutas
-import { routerUser } from "./src/modules/routes/rutasUsers.js";
+import { routerUser } from "./src/routes/rutasUsers.js";
 app.use("/", routerUser);
 
-import { routerAdmin } from "./src/modules/routes/rutasAdmin.js";
+import { routerAdmin } from "./src/routes/rutasAdmin.js";
 app.use("/api", routerAdmin);
 
 // Direcciones estáticas
@@ -41,9 +36,6 @@ app.use(
   express.static("src/modules/uploads/products")
 );
 
-app.use(express.static(path.join(__dirname, "public")));
-
-// Manejador de errores
 app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).json({ message: "Error interno del servidor" });
