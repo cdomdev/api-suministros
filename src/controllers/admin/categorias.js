@@ -5,11 +5,11 @@ import { generarCodigoDesdeNombre } from "../../utils/generateCodigo.js";
 
 export const crearCategorias = async (req, res) => {
   const { nombre } = req.body;
-  if (req.user.role !== "admin") {
-    return res
-      .status(403)
-      .json({ success: false, message: "Acceso no autorizado" });
-  }
+  // if (req.user.role !== "admin") {
+  //   return res
+  //     .status(403)
+  //     .json({ success: false, message: "Acceso no autorizado" });
+  // }
   try {
     if (nombre) {
       // genera codigo para categoria
@@ -52,13 +52,13 @@ export const listarCategorias = async (req, res) => {
 };
 
 export const eliminarCategoria = async (req, res) => {
-  const { id } = req.body;
+  const { id } = req.params;
 
-  if (req.user.role !== "admin") {
-    return res
-      .status(403)
-      .json({ success: false, message: "Acceso no autorizado" });
-  }
+  // if (req.user.role !== "admin") {
+  //   return res
+  //     .status(403)
+  //     .json({ success: false, message: "Acceso no autorizado" });
+  // }
   try {
     const categoria = await Categorias.destroy({
       where: { id: id },

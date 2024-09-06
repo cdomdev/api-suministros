@@ -99,6 +99,7 @@ export const listarSubcategoria = async (req, res) => {
         "description",
         "image",
         "referencia",
+        "discount",
       ],
     });
 
@@ -163,11 +164,42 @@ export const masVendidos = async (req, res) => {
     const products = await Productos.findAll({
       order: [["sales_count", "DESC"]],
       limit: 4,
+      attributes: [
+        "id",
+        "marca",
+        "nombre",
+        "valor",
+        "description",
+        "image",
+        "referencia",
+        "discount",
+      ],
     });
 
     // Enviar la lista de productos
-    return res.status(200).json({ data: products });
+    return res.status(200).json({ productos: products });
   } catch (error) {
     console.log("Error al obtener las lista de productos mas vendidos", error);
+  }
+};
+
+export const listarProductoID = async (req, res) => {
+  try {
+    const { id } = req.params;
+    // Buscar la categoría padre por su código
+    const producto = await Productos.findOne({
+      where: { id }
+    });
+
+    if (!producto) {
+      return res.status(404).json({ error: "Producto no encontrado" });
+    }
+    res.json({ producto });
+  } catch (error) {
+    console.error(
+      "Error al obtener las categorías y sus productos asociados:",
+      error
+    );
+    res.status(500).json({ error: "Error interno del servidor" });
   }
 };

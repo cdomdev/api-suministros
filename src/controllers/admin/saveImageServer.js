@@ -1,5 +1,6 @@
 export const saveImagenServer = (req, res) => {
   try {
+    console.log("data--->", req.files);
     if (!req.files || req.files.length === 0) {
       return res.status(400).send("Por favor, sube una o más imágenes");
     }

@@ -149,3 +149,77 @@ export const mostSalledsProducts = async (req, res) => {
     console.log("Error al obtener las lista de productos mas vendidos", error);
   }
 };
+
+// listado de ventas por mes
+export const salesMonth = async (req, res) => {
+  try {
+    const users = await listUser();
+    const invited = await listInvited();
+
+    // Listar pedidos para usuarios e invitados
+    const ventasUsuarios = await listUsersWithOrders(users, "usuario_id");
+    const ventasInvitados = await listUsersWithOrders(invited, "invitado_id");
+
+    // Aplanar los arrays y combinarlos
+    const ventas = [...ventasUsuarios.flat(), ...ventasInvitados.flat()];
+
+    // Enviar la respuesta correcta
+    res.status(200).json(ventas);
+  } catch (error) {
+    console.log("Error en el listado de ventas por mes:", error);
+    res.status(500).json({ message: "Error al obtener las ventas." });
+  }
+};
+
+const listUser = async () => {
+  try {
+    const usuarios = await User.findAll({
+      attributes: ["id", "name", "email", "picture"],
+    });
+
+    return usuarios || [];
+  } catch (e) {
+    console.log("Error en el listado de usuarios", e);
+  }
+};
+
+const listInvited = async () => {
+  try {
+    const invitados = await Invitado.findAll({
+      attributes: ["id", "nombre", "email"],
+    });
+    return invitados || [];
+  } catch (e) {
+    console.log("Error en el listado de usuarios", e);
+  }
+};
+
+const listUsersWithOrders = async (users, conditionKey) => {
+  const usersWithOrders = await Promise.all(
+    users.map(async (user) => {
+      const pedidos = await Pedido.findAll({
+        where: { [conditionKey]: user.id },
+        include: [
+          {
+            model: DetallesPedido,
+            as: "detalles_pedido",
+            attributes: ["id", "total_pago", "createdAt"],
+          },
+        ],
+      });
+
+      // Solo devuelve el usuario si tiene pedidos
+      if (pedidos.length > 0) {
+        return {
+          ...user.toJSON(),
+          pedidos,
+        };
+      }
+      // Retorna null si no tiene pedidos
+      return null;
+    })
+  );
+
+  // Filtra los resultados para eliminar los valores null
+  return usersWithOrders.filter((user) => user !== null);
+};

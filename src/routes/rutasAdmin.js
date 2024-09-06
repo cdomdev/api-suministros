@@ -40,6 +40,7 @@ import {
 import {
   balances,
   mostSalledsProducts,
+  salesMonth,
 } from "../controllers/admin/balances.js";
 import {
   deleteNotifications,
@@ -57,7 +58,7 @@ routerAdmin.post("/upload", imageUpload.array("files"), saveImagenServer);
 // categorias
 routerAdmin.post("/categories/create", authenticateToken, crearCategorias);
 
-routerAdmin.get("/categories/list", authenticateToken, listarCategorias);
+routerAdmin.get("/categories/list", listarCategorias);
 
 routerAdmin.delete(
   "/categories/delete/:id",
@@ -81,7 +82,7 @@ routerAdmin.delete(
 );
 
 // inventario
-routerAdmin.get("/inventary/list-products", authenticateToken, listarProductos);
+routerAdmin.get("/inventary/list-products", listarProductos);
 
 routerAdmin.put(
   "/inventary/products/update-stock/:id",
@@ -119,22 +120,26 @@ routerAdmin.put("/oferta/update/:id", authenticateToken, actulizarOfertas);
 
 // listar pedido
 
-routerAdmin.get("/listar/usuarios", authenticateToken, listarPedidos);
-routerAdmin.post("/listar/pedidos-usuario/:id", listarPedidoPorUsuario);
-routerAdmin.post("/listar/pedidos-invitado/:id", listarPedidoPorInvitado);
+routerAdmin.get("/listar/usuarios-con-pedidos", listarPedidos);
+routerAdmin.get("/listar/pedidos-usuario/:id", listarPedidoPorUsuario);
+routerAdmin.get("/listar/pedidos-invitado/:id", listarPedidoPorInvitado);
 
-routerAdmin.post("/update/state-orders", authenticateToken, updateStateOrders);
+routerAdmin.post(
+  "/update/state-orders/:id",
+  authenticateToken,
+  updateStateOrders
+);
 routerAdmin.post("/logout", logout);
 
 // balances
 
-routerAdmin.get("/see-balance-sheets", authenticateToken, balances);
+routerAdmin.get("/see-balance-sheets", balances);
 routerAdmin.get("/see-best-sallers", authenticateToken, mostSalledsProducts);
-
+routerAdmin.get("/sales-month", salesMonth);
 // notificaciones
 
 routerAdmin.get("/notifications-admin", authenticateToken, notificationList);
-routerAdmin.post(
+routerAdmin.delete(
   "/delete-nofitication/:id",
   authenticateToken,
   deleteNotifications

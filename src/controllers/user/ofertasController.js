@@ -1,30 +1,36 @@
 import { Ofertas, Productos } from "../../models/index.js";
+import { Op } from "sequelize";
 
-// listar ofertas con productos relacionados
+// listar productos con ofertas
 export const listarOfertasConProductos = async (req, res) => {
   try {
-    const ofertas = await Ofertas.findAll({
-      include: {
-        model: Productos,
-        attributes: [
-          "id",
-          "marca",
-          "nombre",
-          "description",
-          "referencia",
-          "image",
-          "valor",
-        ],
-        through: "productos_ofertas",
+    const ofertas = await Productos.findAll({
+      where: {
+        discount: {
+          [Op.ne]: null,
+          [Op.gt]: 0,
+        },
       },
+      attributes: [
+        "id",
+        "marca",
+        "nombre",
+        "valor",
+        "description",
+        "image",
+        "referencia",
+        "discount",
+      ],
     });
 
-    if (!ofertas) {
-      return res.status(400).json({ message: "Oferta no encontrada" });
+    if (!ofertas || ofertas.length === 0) {
+      return res.status(400).json({ message: "No hay productos en las ofertas" });
     }
-    return res.status(200).json({ ofertas });
+
+
+    return res.status(200).json({ productos: ofertas });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ message: "Error al obetenr la oferta" });
+    return res.status(500).json({ message: "Error al obtener las ofertas" });
   }
 };

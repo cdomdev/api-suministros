@@ -101,7 +101,7 @@ export const obtenerOfertasConProductos = async (req, res) => {
 // elimar ofertas
 
 export const eliminarOferta = async (req, res) => {
-  const { id } = req.body;
+  const { id } = req.params;
 
   if (req.user.role !== "admin") {
     return res
@@ -128,7 +128,7 @@ export const eliminarOferta = async (req, res) => {
     });
 
     return res.status(200).json({
-      message: "Oferta eliminada.",
+      message: "OK",
       ofertas,
     });
   } catch (error) {
@@ -139,7 +139,8 @@ export const eliminarOferta = async (req, res) => {
 
 // actulizar
 export const actulizarOfertas = async (req, res) => {
-  const { updatedValues, oferta_id } = req.body;
+  const { updatedValues } = req.body;
+  const { id } = req.params;
   const { nombre, descuento, fechaIni, fechaFin } = updatedValues;
 
   if (req.user.role !== "admin") {
@@ -147,15 +148,16 @@ export const actulizarOfertas = async (req, res) => {
       .status(403)
       .json({ success: false, message: "Acceso no autorizado" });
   }
+
   const fecha_inicio = fechaIni;
   const fecha_fin = fechaFin;
 
   try {
-    const ofertaUpdate = await Ofertas.findOne({ where: oferta_id });
+    const ofertaUpdate = await Ofertas.findOne({ where: { id } });
     if (ofertaUpdate) {
       await Ofertas.update(
         { nombre, descuento, fecha_inicio, fecha_fin },
-        { where: { id: oferta_id } }
+        { where: { id } }
       );
 
       const ofertas = await Ofertas.findAll({

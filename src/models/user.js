@@ -1,6 +1,5 @@
 import { DataTypes } from "sequelize";
 import { conecction } from "../../database/conecction.js";
-import { Pedido, Roles } from "./index.js";
 
 export const User = conecction.define(
   "usuarios",
@@ -11,7 +10,7 @@ export const User = conecction.define(
       allowNull: false,
       primaryKey: true,
     },
-    name: {
+    nombre: {
       type: DataTypes.STRING,
       allowNull: false,
     },

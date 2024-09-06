@@ -92,42 +92,9 @@ export const listarPedidosInvitados = async () => {
 
 export const listarPedidoPorUsuario = async (req, res) => {
   const { id } = req.params;
-  let condicion = { usuario_id: id };
-  try {
-    const pedidos = await listOrders(condicion);
-    if (pedidos.length === 0) {
-      res.status(404).json({ message: "El usuario no tiene pedidos" });
-    }
-
-    res.status(200).json({ pedidos: pedidos });
-  } catch (error) {
-    console.log("error al listar los pedidos del usuario", error);
-    res.status(500).json({ message: "Error en el servidor" });
-  }
-};
-
-export const listarPedidoPorInvitado = async (req, res) => {
-  const { id } = req.params;
-
-  let condicion = { invitado_id: id };
-
-  try {
-    const pedidos = await listOrders(condicion);
-    if (pedidos.length === 0) {
-      res.status(404).json({ message: "El usuario no tiene pedidos" });
-    }
-
-    res.status(200).json({ pedidos: pedidos });
-  } catch (e) {
-    res.status(500).json({ message: "Error en el servidor", e });
-    console.log(e);
-  }
-};
-
-const listOrders = async (res, condicion) => {
   try {
     const pedidos = await Pedido.findAll({
-      where: condicion,
+      where: { usuario_id: id },
       attributes: ["id"],
       include: [
         {
@@ -157,16 +124,59 @@ const listOrders = async (res, condicion) => {
       ],
     });
 
-    if (!pedidos) {
-      res.status(400).json({
-        message:
-          "Error al obtener el listado de pedidos en la funcion listOrders",
-      });
+    if (pedidos.length === 0) {
+      res.status(404).json({ message: "El usuario no tiene pedidos" });
     }
 
-    return pedidos;
+    res.status(200).json({ pedidos });
   } catch (error) {
-    console.log("Erro al listar los pedidos, en la funcion listOrders", error);
+    console.log("error al listar los pedidos del usuario", error);
+    res.status(500).json({ message: "Error en el servidor" });
+  }
+};
+
+export const listarPedidoPorInvitado = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const pedidos = await Pedido.findAll({
+      where: { invitado_id: id },
+      attributes: ["id"],
+      include: [
+        {
+          model: DetallesPedido,
+          as: "detalles_pedido",
+          attributes: [
+            "id",
+            "precio_unitario",
+            "sub_total",
+            "cantidad",
+            "total_pago",
+            "metodo_pago",
+            "descuento",
+            "estado_pedido",
+            "descuento",
+            "costo_de_envio",
+            "status_detail",
+            "createdAt",
+          ],
+          include: [
+            {
+              model: Productos,
+              attributes: ["id", "nombre", "image", "referencia", "valor"],
+            },
+          ],
+        },
+      ],
+    });
+    if (pedidos.length === 0) {
+      res.status(404).json({ message: "El usuario no tiene pedidos" });
+    }
+
+    res.status(200).json({ pedidos });
+  } catch (e) {
+    res.status(500).json({ message: "Error en el servidor", e });
+    console.log(e);
   }
 };
 
@@ -189,20 +199,15 @@ const listUsersWithOrders = async (users, conditionKey) => {
 };
 
 export const updateStateOrders = async (req, res) => {
-  if (req.user.role !== "admin") {
-    return res
-      .status(403)
-      .json({ success: false, message: "Acceso no autorizado" });
-  }
-  const { estado, id } = req.body;
+  // if (req.user.role !== "admin") {
+  //   return res
+  //     .status(403)
+  //     .json({ success: false, message: "Acceso no autorizado" });
+  // }
 
+  const { id } = req.params;
+  const { estado } = req.body;
   try {
-    if (req.user.role !== "admin") {
-      return res
-        .status(403)
-        .json({ success: false, message: "Acceso no autorizado" });
-    }
-
     if (!estado || !id) {
       return res
         .status(400)
@@ -215,8 +220,7 @@ export const updateStateOrders = async (req, res) => {
     );
 
     if (updatedRows[0] === 1) {
-      console.log(updatedRows);
-      res.status(200).json({ message: "Estado actilizado con exito" });
+      res.status(200).json({ estado, message: "Estado actilizado con exito" });
     } else {
       console.log("Error al actulizar el estado del pedido");
       res.status(404).json({ message: "Error al actulizar el estado" });

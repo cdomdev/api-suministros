@@ -4,10 +4,11 @@ export const createNotifications = async (data) => {
   try {
     if (data) {
       const notificacion = await Notifcaciones.create({
-        mensaje: `Hola admin, el usuario ${
+        mensaje: `El usuario ${
           data.name || data.nombre
         } ha creado un nuevo pedido`,
       });
+
       if (notificacion) {
         console.log("Notificacion creada");
       }

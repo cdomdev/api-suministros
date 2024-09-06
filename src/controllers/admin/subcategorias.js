@@ -4,11 +4,11 @@ import { generarCodigoDesdeNombre } from "../../utils/generateCodigo.js";
 // subcategorias
 
 export const crearSubcategorias = async (req, res) => {
-  if (req.user.role !== "admin") {
-    return res
-      .status(403)
-      .json({ success: false, message: "Acceso no autorizado" });
-  }
+  // if (req.user.role !== "admin") {
+  //   return res
+  //     .status(403)
+  //     .json({ success: false, message: "Acceso no autorizado" });
+  // }
   try {
     // extraer elemntos
     if (req) {
@@ -52,34 +52,40 @@ export const listarSubcategorias = async (req, res) => {
 };
 
 export const eliminarSubcategoria = async (req, res) => {
-  const { id } = req.body;
-  if (req.user.role !== "admin") {
+  const { id } = req.params;
+  // if (req.user.role !== "admin") {
+  //   return res
+  //     .status(403)
+  //     .json({ success: false, message: "Acceso no autorizado" });
+  // }
+  if (!id) {
     return res
-      .status(403)
-      .json({ success: false, message: "Acceso no autorizado" });
+      .status(400)
+      .json({ error: "ID de subcategoría no proporcionado" });
   }
 
   try {
-    const categoriaEliminada = await Subcategorias.destroy({
+    const subcategoriaExistente = await Subcategorias.findOne({
       where: { id: id },
     });
 
-    if (categoriaEliminada) {
-      const categorias = await Subcategorias.findAll({
-        attributes: ["id", "nombre"],
-      });
-      return res
-        .status(200)
-        .json({ message: "Categoría eliminada exitosamente", categorias });
-    } else {
-      return res
-        .status(404)
-        .json({ message: "No se encontró la categoría a eliminar" });
+    if (!subcategoriaExistente) {
+      return res.status(404).json({ message: "Subcategoría no encontrada" });
     }
+    await Subcategorias.destroy({
+      where: { id: id },
+    });
+
+    const categoriasRestantes = await Subcategorias.findAll({
+      attributes: ["id", "nombre"],
+    });
+
+    return res.status(200).json({
+      message: "Subcategoría eliminada exitosamente",
+      categorias: categoriasRestantes,
+    });
   } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({ error: "Error al intentar eliminar la categoría" });
+    console.log("Error interno del servidor", error);
+    res.status(500).json({ message: "Error interne del servidor" });
   }
 };

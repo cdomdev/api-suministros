@@ -2,6 +2,7 @@ import express from "express";
 import {
   buscarProductos,
   listarCategoria,
+  listarProductoID,
   listarSubcategoria,
   masVendidos,
 } from "../controllers/user/productsController.js";
@@ -21,6 +22,7 @@ import {
   resetPassword,
   registroController,
   validateEmail,
+  logout,
 } from "../controllers/user/auth.js";
 import { refreshToken } from "../controllers/user/refreshToken.js";
 import { feedBack, reciveWebhook } from "../controllers/user/webhooks.js";
@@ -34,16 +36,22 @@ export const routerUser = express.Router();
 // autenticacion
 routerUser.post("/user/login", loginController);
 
+// autenticacion
+routerUser.post("/user/logout", logout);
+
+
 // refresh token
 
 routerUser.post("/refresh-token", refreshToken);
 // resgistro
-routerUser.post("/user/registro", registroController);
+routerUser.post("/user/register", registroController);
 // autenticacion y regsitro con google
 routerUser.post("/user/oauth-google", googleLogin);
 // restablecer contraseña
-routerUser.post("/reset-password", resetPassword);
+routerUser.post("/reset-password/:token", resetPassword);
+
 routerUser.post("/user/validate-email", validateEmail);
+
 // datos de usuario
 // perfil
 routerUser.get("/user/profile", obtenerDatosUsuario);
@@ -54,16 +62,22 @@ routerUser.post(
   actulizarDatosDeUsuario
 );
 
+
+// producto por id 
+
+routerUser.get("/producto/:id", listarProductoID);
+
 // mas vendidos
-routerUser.get("/list-most-salleds", masVendidos);
+routerUser.get("/productos/list-most-salleds", masVendidos);
 
 // Listar categoria con prodcutos
 routerUser.get("/categorias/:codigo", listarCategoria);
+
 // listar productos por categorias
 routerUser.get("/subcategorias/:codigo", listarSubcategoria);
 
 // ofertas
-routerUser.get("/listar/ofertas", listarOfertasConProductos);
+routerUser.get("/ofertas", listarOfertasConProductos);
 
 // busqueda de prodcutos
 routerUser.post("/busqueda-productos", buscarProductos);

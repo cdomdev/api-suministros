@@ -3,11 +3,13 @@ import { Productos, Inventario } from "../../models/index.js";
 // Controlador para gauradr productos
 export const guardarProducto = async (req, res) => {
   const { productos } = req.body;
-  if (req.user.role !== "admin") {
-    return res
-      .status(403)
-      .json({ success: false, message: "Acceso no autorizado" });
-  }
+  // if (req.user.role !== "admin") {
+  //   return res
+  //     .status(403)
+  //     .json({ success: false, message: "Acceso no autorizado" });
+  // }
+  console.log("productos --_> ", productos);
+  console.log("productos --_> ", req.body);
   try {
     for (const producto of productos) {
       const nuevoProducto = await Productos.create({

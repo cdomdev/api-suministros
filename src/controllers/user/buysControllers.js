@@ -41,6 +41,9 @@ export const finalizarCompraInvitado = async (req, res) => {
     // Enviar email invitado
     sendMailsCompra(0, usuarioInvitado, dataProducts, valorEnvio);
 
+    // crear la notificacion de la compra
+    createNotifications(dataUser);
+
     // enviar respuesta de la solcitud
     return res.status(200).json({ message: "Compra realzida con exito" });
   } catch (e) {

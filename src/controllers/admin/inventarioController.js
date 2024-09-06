@@ -43,7 +43,9 @@ export const listarProductos = async (req, res) => {
 
 // Controlador para actulizar inventario
 export const actulizarStock = async (req, res) => {
-  const { producto_Id, newStock } = req.body;
+  const { newStock } = req.body;
+  const { id: producto_Id } = req.params;
+  console.log(req.user);
   if (req.user.role !== "admin") {
     return res
       .status(403)
@@ -87,7 +89,7 @@ export const actulizarStock = async (req, res) => {
       });
 
       return res.status(200).json({
-        message: "Cantidad en el inventario actualizada exitosamente.",
+        message: "OK",
         inventaryUpdate,
       });
     } else {
@@ -106,7 +108,8 @@ export const actulizarStock = async (req, res) => {
 
 // Actulizar los productos en inventario
 export const actualizarProducto = async (req, res) => {
-  const { producto_Id, newProduct } = req.body;
+  const { newProduct } = req.body;
+  const { id: producto_Id } = req.params;
 
   const {
     nombre,
@@ -185,13 +188,14 @@ export const actualizarProducto = async (req, res) => {
 
 // Eliminar productos de inventario
 export const eliminarProductos = async (req, res) => {
-  const { producto_Id } = req.body;
+  const { id: producto_Id } = req.params;
 
   if (req.user.role !== "admin") {
     return res
       .status(403)
       .json({ success: false, message: "Acceso no autorizado" });
   }
+
   try {
     // Eliminar el producto por su ID
     const productoEliminado = await Productos.destroy({

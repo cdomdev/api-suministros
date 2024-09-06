@@ -109,13 +109,11 @@ export const googleLogin = async (req, res) => {
 // constrolador para el resgitro de usaurios
 
 export const registroController = async (req, res) => {
-  const { name, email, password } = req.body;
-
-  let clienName = name;
+  const { nombre, email, password } = req.body;
   let clienEmail = email;
 
   try {
-    if (!clienName || !clienEmail || !password) {
+    if (!nombre || !clienEmail || !password) {
       res
         .status(400)
         .json({ message: "falatn datos para proceder con el registro" });
@@ -131,16 +129,16 @@ export const registroController = async (req, res) => {
 
     // crear usuario y asignar rol
     const newUser = await User.create({
-      name: name,
+      nombre: nombre,
       email: email,
       password: hashedPassword,
       rol_user_id: 2,
     });
 
-    sendMailsRegistro(newUser.name, newUser.email);
+    sendMailsRegistro(newUser.nombre, newUser.email);
 
     res.status(201).json({
-      name: newUser.name,
+      nombre: newUser.nombre,
       email: newUser.email,
       picture: newUser.picture,
       rol_user_id: newUser.rolUserId,
@@ -151,68 +149,73 @@ export const registroController = async (req, res) => {
   }
 };
 
-// constrolador para el login de usuarios
 export const loginController = async (req, res) => {
-  const { email1, password } = req.body;
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({
+      success: false,
+      message: "Email y contraseña son requeridos",
+    });
+  }
 
   try {
-    const userFromDB = await userExisting(email1);
+    const userFromDB = await userExisting(email);
 
-    if (userFromDB) {
-      const passwordMatch = await passwordValidate(
-        password,
-        userFromDB.password
-      );
-
-      if (passwordMatch) {
-        const { rol_user_id, email, name, telefono, direccion, id } =
-          userFromDB;
-
-        const accessToken = generateAccessToken(userFromDB);
-        const refreshToken = generateRefreshToken(userFromDB);
-
-        userFromDB.refreshToken = refreshToken;
-        await userFromDB.save();
-
-        res
-          .status(200)
-          .cookie("access_token", accessToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
-            maxAge: 1000 * 60 * 60, // 1hora
-          })
-          .cookie("refresh_token", refreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
-            maxAge: 1000 * 60 * 60 * 24 * 7, // 7 días
-          })
-          .json({
-            success: true,
-            message: `Inicio de sesión exitoso ${userFromDB.roles.rol_name}`,
-            name: name,
-            id: id,
-            rol_user_id: rol_user_id,
-            email: email,
-            telefono: telefono,
-            direccion: direccion,
-            accessToken: accessToken,
-            role: userFromDB.roles.rol_name,
-          });
-      } else {
-        res
-          .status(401)
-          .json({ success: false, message: "Contraseña incorrecta" });
-      }
-    } else {
-      res
-        .status(400)
-        .json({ success: false, message: "Usuario no encontrado" });
+    if (!userFromDB) {
+      return res.status(404).json({
+        success: false,
+        message: "Usuario no encontrado",
+      });
     }
+
+    const passwordMatch = await passwordValidate(password, userFromDB.password);
+
+    if (!passwordMatch) {
+      return res.status(401).json({
+        success: false,
+        message: "Contraseña incorrecta",
+      });
+    }
+
+    const accessToken = generateAccessToken(userFromDB);
+    const refreshToken = generateRefreshToken(userFromDB);
+
+    userFromDB.refreshToken = refreshToken;
+    await userFromDB.save();
+
+    // Asegúrate de que las cookies se están enviando correctamente
+    res
+      .status(200)
+      .cookie("access_token", accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 1000 * 60 * 60, // 1 hora
+      })
+      .cookie("refresh_token", refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 días
+      })
+      .json({
+        success: true,
+        message: `OK`,
+        nombre: userFromDB.nombre,
+        email: userFromDB.email,
+        telefono: userFromDB.telefono,
+        direccion: userFromDB.direccion,
+        role: userFromDB.roles.rol_name,
+        picture: userFromDB.picture
+      });
+
   } catch (error) {
     console.error("Error en el controlador de inicio de sesión:", error);
-    res.status(500).json({ success: false, message: "Error en el servidor" });
+    res.status(500).json({
+      success: false,
+      message: "Error en el servidor. Por favor intente de nuevo más tarde.",
+    });
   }
 };
 
@@ -246,15 +249,15 @@ export const validateEmail = async (req, res) => {
     userData.resetPasswordExpires = tokenExpires;
     await userData.save();
 
-    const resetUrl = `http://localhost:5173/suministros/reset-password/${token}`;
+    const resetUrl = `http://localhost:4321/restablecer-contrasenia/${token}`;
 
-    const { name } = userData;
+    const { nombre } = userData;
 
-    sendMailsRecover(name, email, resetUrl);
+    sendMailsRecover(nombre, email, resetUrl);
 
     return res.status(200).json({
-      email: email,
-      name: name,
+      email,
+      nombre,
     });
   } catch (error) {
     console.error(error);
@@ -264,10 +267,12 @@ export const validateEmail = async (req, res) => {
 
 // controlador para restablecer contraseñas
 export const resetPassword = async (req, res) => {
-  const { values, token } = req.body;
+  const { password } = req.body;
+  const { token } = req.params
+
 
   if (!token) {
-    return res.status(400).json({ message: "Token no proporcionado" });
+    return res.status(401).json({ message: "Token no proporcionado" });
   }
   try {
     const user = await User.findOne({
@@ -281,7 +286,7 @@ export const resetPassword = async (req, res) => {
       return res.status(400).json({ message: "Token inválido o expirado" });
     }
 
-    const hashedPassword = await bcrypt.hash(values.password, 12);
+    const hashedPassword = await bcrypt.hash(password, 12);
     user.password = hashedPassword;
     user.resetPasswordToken = null;
     user.resetPasswordExpires = null;
@@ -295,5 +300,19 @@ export const resetPassword = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Error en el proceso", error });
+  }
+};
+
+
+export const logout = (req, res) => {
+  try {
+    res
+      .status(200)
+      .clearCookie("access_token", { path: '/' })
+      .clearCookie("refresh_token", { path: '/' })
+      .json({ message: "Logout successful" });
+  } catch (error) {
+    console.log("Error during logout ", error);
+    res.status(500).json({ message: "Logout failed" });
   }
 };
