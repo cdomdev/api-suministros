@@ -1,9 +1,9 @@
-export const createItemsMercadoPago = (cartItems, costoEnvio) => {
+export const createItemsMercadoPago = (productos, costoEnvio) => {
   // Construir el array de items para Mercado Pago
-  const mercadoPagoItems = cartItems.map((item) => ({
+  const mercadoPagoItems = productos.map((item) => ({
     title: item.nombre,
-    quantity: item.cantidad,
-    unit_price: Number(item.valor),
+    quantity: item.quantity,
+    unit_price: aplicarDescuento(item)
   }));
 
   // Agregar el envío como un solo item al array de items para Mercado Pago
@@ -14,6 +14,16 @@ export const createItemsMercadoPago = (cartItems, costoEnvio) => {
       unit_price: costoEnvio,
     });
   }
-
   return mercadoPagoItems;
 };
+
+
+const aplicarDescuento = (producto) => {
+  if (producto.valor > 0) {
+    let valorDescuento = producto.valor - (producto.valor * (producto.discount / 100))
+    return Number(valorDescuento)
+  } else {
+    return Number(producto.valor)
+  }
+
+}

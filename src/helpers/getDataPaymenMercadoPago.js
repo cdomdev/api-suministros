@@ -1,5 +1,6 @@
 import { client } from "../helpers/mercadoPagoConfig.js";
 import axios from "axios";
+import { updateDataPedido } from '../helpers/updateDataOrder.js'
 
 //  referecnias del payment en merchan_order
 export const handleMerchantOrderNotification = async (body, res) => {
@@ -55,9 +56,10 @@ export const handlePaymentNotification = async (body, res) => {
         return res.status(500).send("Error: Datos de pago incompletos");
       }
 
-      const pedidoId = Number(external_reference);
+      const pedidoId = external_reference;
+      console.log('referencia externa ---_>  ', external_reference)
 
-      const result = await updateDetallesPedido(status_detail, id, pedidoId);
+      const result = await updateDataPedido(status_detail, id, pedidoId);
 
       if (result) {
         return res.status(200).send("Webhook received and processed");

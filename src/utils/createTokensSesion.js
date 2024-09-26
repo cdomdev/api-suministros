@@ -5,7 +5,7 @@ const secretRefreshToken = process.env.CLAVE_FOR_TOKEN_REFRESH;
 
 export const generateAccessToken = (user) => {
   return jwt.sign(
-    { id: user.id, username: user.name, role: user.roles.rol_name },
+    { id: user.id, username: user.name, role: 'user' },
     secretForToken,
     { expiresIn: "1h" }
   );
@@ -13,7 +13,7 @@ export const generateAccessToken = (user) => {
 
 export const generateRefreshToken = (user) => {
   return jwt.sign(
-    { id: user.id, username: user.name, role: user.roles.rol_name },
+    { id: user.id, username: user.name, role: 'user' },
     secretRefreshToken,
     { expiresIn: "1d" }
   );

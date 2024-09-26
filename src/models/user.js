@@ -28,15 +28,19 @@ export const User = conecction.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    rol_user_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
     telefono: {
       type: DataTypes.STRING,
       allowNull: true,
     },
     direccion: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    ciudad: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    departamento: {
       type: DataTypes.STRING,
       allowNull: true,
     },
@@ -55,6 +59,10 @@ export const User = conecction.define(
     resetPasswordExpires: {
       type: DataTypes.DATE,
       allowNull: true,
+    },
+    rol_user_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
   },
   {

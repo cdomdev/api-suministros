@@ -13,7 +13,6 @@ export const transporter = nodemailer.createTransport({
   },
 });
 
-// Obtener __dirname en un módulo ES
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -24,7 +23,7 @@ export const mailOptionsBase = {
     {
       filename: "fb.png",
       path: path.join(__dirname, "../../public/images/fb.png"),
-      cid: "fb", // Content-ID para referenciar la imagen en el HTML
+      cid: "fb",
     },
     {
       filename: "ig.png",

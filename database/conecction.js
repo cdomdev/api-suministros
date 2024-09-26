@@ -2,7 +2,6 @@ import { Sequelize } from "sequelize";
 import dotenv from "dotenv";
 dotenv.config();
 
-// Configuración de la base de datos
 const dbConfig = {
   host: process.env.HOST,
   user: process.env.USER,
@@ -10,7 +9,6 @@ const dbConfig = {
   database: process.env.DATABASE,
 };
 
-// Crear conexión de Sequelize
 export const conecction = new Sequelize(
   dbConfig.database,
   dbConfig.user,
@@ -21,7 +19,6 @@ export const conecction = new Sequelize(
   }
 );
 
-// Verificar la conexión y sincronizar modelos
 conecction
   .sync()
   .then(() => {

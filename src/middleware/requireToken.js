@@ -1,5 +1,4 @@
 export const requireToken = (req, res, next) => {
-  console.log(req.user);
   try {
     if (req.user.role !== "admin") {
       return res

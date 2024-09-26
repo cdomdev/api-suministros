@@ -1,19 +1,19 @@
 import { User } from "../models/user.js";
 
-export const updateDataUser = async (user) => {
+export const updateDataUser = async (datos) => {
   try {
-    if (user.telefono || user.direccion || user.detalles) {
+    if (datos.telefono || datos.direccion || datos.detalles) {
       await User.update(
         {
-          telefono: user.telefono,
-          direccion: user.direccion,
-          detalles: user.detalles,
+          telefono: datos.telefono,
+          direccion: datos.direccion,
+          detalles: datos.detalles,
         },
-        { where: { email: user.email } }
+        { where: { email: datos.email } }
       );
     }
   } catch (error) {
-    console.log("Hubo un error al actualizar datos del usuario", error);
+    throw new Error('Hubo un error al actualizar datos del usuario')
   }
 };
 
@@ -26,6 +26,6 @@ export const updateDataProfile = async (user, email) => {
     );
     return updatedUser;
   } catch (error) {
-    console.log("Error al actualizar los datos del pertil", error);
+    throw new Error('Error al actualizar los datos del pertil')
   }
 };

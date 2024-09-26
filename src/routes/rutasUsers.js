@@ -3,6 +3,7 @@ import {
   buscarProductos,
   listarCategoria,
   listarProductoID,
+  listarProductos,
   listarSubcategoria,
   masVendidos,
 } from "../controllers/user/productsController.js";
@@ -46,7 +47,7 @@ routerUser.post("/refresh-token", refreshToken);
 // resgistro
 routerUser.post("/user/register", registroController);
 // autenticacion y regsitro con google
-routerUser.post("/user/oauth-google", googleLogin);
+routerUser.post("/user/google-auth", googleLogin);
 // restablecer contraseña
 routerUser.post("/reset-password/:token", resetPassword);
 
@@ -57,42 +58,33 @@ routerUser.post("/user/validate-email", validateEmail);
 routerUser.get("/user/profile", obtenerDatosUsuario);
 // actualizar perfil
 routerUser.post(
-  "/user/profile/update",
-  authenticateToken,
+  "/user/profile-update",
   actulizarDatosDeUsuario
 );
 
 
-// producto por id 
-
+routerUser.get("/productos", listarProductos)
 routerUser.get("/producto/:id", listarProductoID);
 
-// mas vendidos
 routerUser.get("/productos/list-most-salleds", masVendidos);
 
-// Listar categoria con prodcutos
 routerUser.get("/categorias/:codigo", listarCategoria);
 
-// listar productos por categorias
 routerUser.get("/subcategorias/:codigo", listarSubcategoria);
 
-// ofertas
 routerUser.get("/ofertas", listarOfertasConProductos);
 
-// busqueda de prodcutos
 routerUser.post("/busqueda-productos", buscarProductos);
 
 // compra
 
-// Finalizar compra invitado
-routerUser.post("/finish/buy/invited", finalizarCompraInvitado);
-// finalizar compra usuario
-routerUser.post("/finish/buy/user", finalizarCompraUsuario);
+routerUser.post("/finish/buy-invited", finalizarCompraInvitado);
 
-// finalizar pago con mercado pago
-routerUser.post("/finish/buy/mercadopago-user", createPreferenceUser);
+routerUser.post("/finish/buy-user", finalizarCompraUsuario);
 
-routerUser.post("/finish/buy/mercadopago-invited", createPreferenceInvited);
+routerUser.post("/finish/mercadopago-user", createPreferenceUser);
+
+routerUser.post("/finish/mercadopago-invited", createPreferenceInvited);
 
 routerUser.post("/webhooks-invited", reciveWebhook);
 
@@ -100,5 +92,4 @@ routerUser.post("/webhooks-user", reciveWebhook);
 
 routerUser.get("/feedBack", feedBack);
 
-// ver pedidos
-routerUser.post("/user/listar-pedidos/:id", listarPedidoPorUsuario);
+routerUser.get("/user/pedidos/:id", listarPedidoPorUsuario);

@@ -1,15 +1,19 @@
-import { DetallesPedido } from "../models/detallesPedido.js";
+import { Pedido } from "../models/index.js";
 
 // actualizar datos del pedido
-export const updateDetallesPedido = async (status_detail, id, pedidoId) => {
+export const updateDataPedido = async (status_detail, id, pedidoId) => {
+
+  console.log('valor del estatus detail---> ', status_detail)
+  console.log('valor del id otro   ---> ', id)
+  console.log('valor del id pedido ---> ', pedidoId)
   try {
-    const [affectedRows] = await DetallesPedido.update(
+    const [affectedRows] = await Pedido.update(
       {
-        status_detail: status_detail,
-        order_id: id,
+        status_mercadopago: status_detail,
+        mercadopago_id: id,
       },
       {
-        where: { pedido_id: pedidoId },
+        where: { id: pedidoId },
       }
     );
 

@@ -12,7 +12,7 @@ app.use(morgan("combined"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const allowedOrigins = ["http://localhost:4321", "http://localhost:5173"];
+const allowedOrigins = ["http://localhost:4321", "http://localhost:4322", "http://localhost:5173"];
 
 app.use(
   cors({

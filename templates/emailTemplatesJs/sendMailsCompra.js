@@ -15,20 +15,15 @@ export function sendMailsCompra(
     // Notificacion para usuario
     {
       subject: `Nueva compra`,
-      titulo: `¡Hola ${
-        usuario.nombre || usuario.name
-      }, tu compra fue realizada con exito ! `,
+      titulo: `¡Hola ${usuario.nombre
+        }, tu compra fue realizada con exito ! `,
       mensaje: `Acontinuacion un resumen de tu pedido`,
     },
     // notificaion para administrador
     {
       subject: "Nueva compra",
-      titulo: `¡Se realizo una nueva compra a nombre de ${
-        usuario.nombre || usuario.name
-      }!`,
-      mensaje: `Hola Admin , el usuario ${
-        usuario.nombre || usuario.name
-      } realizo nuevo pedido`,
+      titulo: `¡Se realizo una nueva compra a nombre de ${usuario.nombre}!`,
+      mensaje: `Hola Admin , el usuario ${usuario.nombre} realizo nuevo pedido`,
     },
     // Correo programado
     {
@@ -69,9 +64,8 @@ export function sendMailsCompra(
   
               <!-- Contenido principal -->
               <div style="background-color: #ffffff; padding: 5px 0px 25px 0px; width: 100%; text-align: center;;">
-                 <h2 style="max-inline-size: 75%; margin: 20px auto 20px auto;">Hola ${
-                   usuario.nombre || usuario.name
-                 }, aqui esta un detalle de tu pedido</h2>
+                 <h2 style="max-inline-size: 75%; margin: 20px auto 20px auto;">Hola ${usuario.nombre || usuario.name
+    }, aqui esta un detalle de tu pedido</h2>
                   <hr style="width: 90%; margin: auto;">
                   <p style="font-weight: bold;">
                       Para tu pago contra entrega, ten en cuenta lo siguiente:
@@ -101,22 +95,20 @@ export function sendMailsCompra(
                           </thead>
                           <tbody>
                               ${dataProducts
-                                .map(
-                                  (producto) => `
+      .map(
+        (producto) => `
                               <tr>
-                                  <td style="border: 1px solid  #ccc;">${
-                                    producto.nombre
-                                  }</td>
-                                  <td style="border: 1px solid #ccc;">${
-                                    producto.cantidad
-                                  } U.N</td>
+                                  <td style="border: 1px solid  #ccc;">${producto.nombre
+          }</td>
+                                  <td style="border: 1px solid #ccc;">${producto.cantidad
+          } U.N</td>
                                   <td style="border: 1px solid #ccc;">${formateValue(
-                                    parseInt(producto.valor)
-                                  )}</td>
+            parseInt(producto.valor)
+          )}</td>
                               </tr>
                               `
-                                )
-                                .join("")}
+      )
+      .join("")}
                                 
                           </tbody>
                           <tfoot>
@@ -124,14 +116,13 @@ export function sendMailsCompra(
                                   <td colspan="3"
                                       style="border: 1px solid #ccc; padding: 8px; font-weight: bold; text-align: center;">
                                       Total:
-                                      ${
-                                        formateValue(
-                                          calcularTotal(dataProducts) +
-                                            valorEnvio
-                                        ) ||
-                                        formateValue(dataProducts.valor) +
-                                          valorEnvio
-                                      }</td>
+                                      ${formateValue(
+        calcularTotal(dataProducts) +
+        valorEnvio
+      ) ||
+    formateValue(dataProducts.valor) +
+    valorEnvio
+    }</td>
                               </tr>
                           </tfoot>
                       </table>

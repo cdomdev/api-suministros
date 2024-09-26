@@ -6,7 +6,7 @@ export const listarPedidoPorUsuario = async (req, res) => {
   try {
     const pedidos = await Pedido.findAll({
       where: { usuario_id: id },
-      attributes: ["id"],
+      attributes: ["id", "costo_de_envio", "pago_total", "estado_pedido",],
       include: [
         {
           model: DetallesPedido,
@@ -16,9 +16,7 @@ export const listarPedidoPorUsuario = async (req, res) => {
             "precio_unitario",
             "sub_total",
             "cantidad",
-            "total_pago",
-            "estado_pedido",
-            "costo_de_envio",
+            "descuento"
           ],
           include: [
             {
@@ -30,11 +28,11 @@ export const listarPedidoPorUsuario = async (req, res) => {
       ],
     });
 
-    if (pedidos) {
-      res.status(200).json({ pedidos });
-    } else {
-      res.status(404).json({ message: "El usuario no tiene pedidos" });
+    if (!pedidos || pedidos.length === 0) {
+      return res.status(404).json({ message: "El usuario no tiene pedidos" });
     }
+
+    res.status(200).json({ pedidos });
   } catch (e) {
     res.status(500).json({ message: "Error en el servidor", e });
     console.log(e);

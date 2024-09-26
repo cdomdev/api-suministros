@@ -17,132 +17,91 @@ import {
   generateAccessToken,
   generateRefreshToken,
 } from "../../utils/createTokensSesion.js";
+import { createNewUser, findOrCreateUserGoogle } from "../../helpers/userHelper.js";
 
-const CLIENT_ID = process.env.CLIENT_ID;
-
-// modulo de promisify para creacion del token
-const randomBytesAsync = promisify(crypto.randomBytes);
-
-// inciio con google
 export const googleLogin = async (req, res) => {
   const { token } = req.body;
-  const defaultPassword = process.env.PASSWORD_DEFAULT;
+  const CLIENT_ID = process.env.CLIENT_ID;
+
   try {
-    // Verificar el token de acceso con Google
     const googleResponse = await axios.get(
       `https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${token}`
     );
 
-    // Verifica que el token sea válido
-    if (googleResponse.data.audience === CLIENT_ID) {
-      // guardar el usuario en base de datos y generar un token JWT
-      const userData = await getUserDataFromGoogle(token);
-
-      // Validar existencia de datos en db
-      let user = await User.findOne({
-        where: { email: userData.email },
-        include: [{ model: Roles, as: "roles" }],
-      });
-
-      if (!user) {
-        // Verificar si el rol de usuario ya existe
-        let roleUser = await Roles.findOne({ where: { rol_name: "user" } });
-
-        if (!roleUser) {
-          roleUser = await Roles.create({
-            rol_name: "user",
-          });
-        }
-
-        user = await User.create({
-          name: userData.name,
-          email: userData.email,
-          picture: userData.picture,
-          password: defaultPassword,
-          rol_user_id: roleUser.id,
-        });
-        sendMailsRegistro(userData.name, userData.email);
-      }
-
-      // crear tokens
-      const accessToken = generateAccessToken(user);
-      const refreshToken = generateRefreshToken(user);
-
-      user.refreshToken = refreshToken;
-      await user.save();
-
-      res
-        .status(200)
-        .cookie("access_token", accessToken, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "strict",
-          maxAge: 1000 * 60 * 60, // 1hora
-        })
-        .cookie("refresh_token", refreshToken, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "strict",
-          maxAge: 1000 * 60 * 60 * 24 * 7, // 7 días
-        })
-        .json({
-          success: true,
-          message: `Inicio de sesión exitoso`,
-          id: user.id,
-          name: user.name,
-          picture: user.picture,
-          email: user.email,
-          telefono: user.telefono,
-          direccion: user.direccion,
-          accessToken: accessToken,
-          role: user.roles.rol_name,
-        });
-    } else {
-      res.status(401).json({ error: "Token de acceso no válido" });
+    if (googleResponse.data.audience !== CLIENT_ID) {
+      return res.status(401).json({ error: 'Token de acceso no válido' });
     }
+
+    const userData = await getUserDataFromGoogle(token);
+
+    const nuevoUser = await findOrCreateUserGoogle(userData)
+
+    const accessToken = generateAccessToken(nuevoUser);
+    const refreshToken = generateRefreshToken(nuevoUser);
+
+    const userSessionData = JSON.stringify({
+      id: nuevoUser.id,
+      nombre: nuevoUser.nombre,
+      email: nuevoUser.email,
+      telefono: nuevoUser.telefono,
+      direccion: nuevoUser.direccion,
+      role: nuevoUser.roles.rol_name,
+      picture: nuevoUser.picture
+    });
+
+    nuevoUser.refreshToken = refreshToken;
+    await nuevoUser.save();
+
+    res
+      .status(200)
+      .cookie("access_token", accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 1000 * 60 * 60,
+      })
+      .cookie("refresh_token", refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 1000 * 60 * 60 * 24 * 7,
+      })
+      .cookie("user_sesion", userSessionData, {
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 1000 * 60 * 60 * 24 * 7
+      })
+      .json({
+        success: true,
+        message: `OK`,
+        id: nuevoUser.id,
+        nombre: nuevoUser.nombre,
+        email: nuevoUser.email,
+        telefono: nuevoUser.telefono,
+        direccion: nuevoUser.direccion,
+        role: nuevoUser.roles.rol_name,
+        picture: nuevoUser.picture
+      });
   } catch (error) {
-    console.error("Error al verificar el token de acceso:", error);
-    res.status(500).json({ error: "Error interno del servidor" });
+    console.error('Error en el proceso de inicio de sesión con Google:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
-
-// constrolador para el resgitro de usaurios
 
 export const registroController = async (req, res) => {
   const { nombre, email, password } = req.body;
   let clienEmail = email;
-
   try {
     if (!nombre || !clienEmail || !password) {
       res
         .status(400)
-        .json({ message: "falatn datos para proceder con el registro" });
+        .json({ message: "faltan datos para proceder con el registro" });
     }
 
-    const existingUser = await userExisting(email);
+    await createNewUser(email);
 
-    if (existingUser) {
-      return res.status(400).json({ error: "El correo ya está registrado" });
-    }
+    res.status(201).json({ message: 'success' });
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // crear usuario y asignar rol
-    const newUser = await User.create({
-      nombre: nombre,
-      email: email,
-      password: hashedPassword,
-      rol_user_id: 2,
-    });
-
-    sendMailsRegistro(newUser.nombre, newUser.email);
-
-    res.status(201).json({
-      nombre: newUser.nombre,
-      email: newUser.email,
-      picture: newUser.picture,
-      rol_user_id: newUser.rolUserId,
-    });
   } catch (error) {
     console.error("Error en el registro:", error);
     return res.status(500).json({ error: "Error en el registro" });
@@ -151,7 +110,6 @@ export const registroController = async (req, res) => {
 
 export const loginController = async (req, res) => {
   const { email, password } = req.body;
-
   if (!email || !password) {
     return res.status(400).json({
       success: false,
@@ -183,25 +141,39 @@ export const loginController = async (req, res) => {
 
     userFromDB.refreshToken = refreshToken;
     await userFromDB.save();
+    const userSessionData = JSON.stringify({
+      id: userFromDB.id,
+      nombre: userFromDB.nombre,
+      email: userFromDB.email,
+      telefono: userFromDB.telefono,
+      direccion: userFromDB.direccion,
+      role: userFromDB.roles.rol_name,
+      picture: userFromDB.picture
+    });
 
-    // Asegúrate de que las cookies se están enviando correctamente
     res
       .status(200)
       .cookie("access_token", accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
-        maxAge: 1000 * 60 * 60, // 1 hora
+        maxAge: 1000 * 60 * 60,
       })
       .cookie("refresh_token", refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
-        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 días
+        maxAge: 1000 * 60 * 60 * 24 * 7,
+      })
+      .cookie("user_sesion", userSessionData, {
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 1000 * 60 * 60 * 24 * 7
       })
       .json({
         success: true,
         message: `OK`,
+        id: userFromDB.id,
         nombre: userFromDB.nombre,
         email: userFromDB.email,
         telefono: userFromDB.telefono,
@@ -209,7 +181,6 @@ export const loginController = async (req, res) => {
         role: userFromDB.roles.rol_name,
         picture: userFromDB.picture
       });
-
   } catch (error) {
     console.error("Error en el controlador de inicio de sesión:", error);
     res.status(500).json({
@@ -219,7 +190,9 @@ export const loginController = async (req, res) => {
   }
 };
 
-// controlador para validar email y restablcer contraseña
+
+const randomBytesAsync = promisify(crypto.randomBytes);
+
 export const validateEmail = async (req, res) => {
   const { email } = req.body;
 

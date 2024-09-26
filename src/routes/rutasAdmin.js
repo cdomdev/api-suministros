@@ -134,7 +134,9 @@ routerAdmin.post("/logout", logout);
 // balances
 
 routerAdmin.get("/see-balance-sheets", balances);
-routerAdmin.get("/see-best-sallers", authenticateToken, mostSalledsProducts);
+routerAdmin.get("/see-best-sallers",
+  //  authenticateToken,
+  mostSalledsProducts);
 routerAdmin.get("/sales-month", salesMonth);
 // notificaciones
 

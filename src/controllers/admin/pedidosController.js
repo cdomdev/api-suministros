@@ -8,11 +8,7 @@ import {
 } from "../../models/index.js";
 
 export const listarPedidos = async (req, res) => {
-  if (req.user.role !== "admin") {
-    return res
-      .status(403)
-      .json({ success: false, message: "Acceso no autorizado" });
-  }
+
   try {
     const usuariosConPedidos = await listarPedidosUsuarios();
     const invitadosConPedidos = await listarPedidosInvitados();
@@ -32,7 +28,7 @@ export const listarPedidosUsuarios = async () => {
   try {
     // Obtener todos los usuarios
     const usuarios = await User.findAll({
-      attributes: ["id", "name", "email", "telefono", "direccion", "detalles"],
+      attributes: ["id", "nombre", "email", "telefono", "direccion", "detalles"],
       include: [
         {
           model: Roles,

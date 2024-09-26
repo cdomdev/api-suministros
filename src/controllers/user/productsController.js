@@ -6,7 +6,6 @@ import {
   Subcategorias,
 } from "../../models/index.js";
 
-// Listar productos - inventario
 export const listarProductos = async (req, res) => {
   try {
     const productos = await Productos.findAll({
@@ -18,18 +17,9 @@ export const listarProductos = async (req, res) => {
         "description",
         "image",
         "referencia",
-        "categoria_id",
+        "discount",
       ],
-      include: [
-        {
-          model: Inventario,
-          attributes: ["cantidad"],
-        },
-        {
-          model: Categorias,
-          attributes: ["nombre"],
-        },
-      ],
+
     });
     res.json({ productos: productos });
   } catch (e) {
@@ -38,9 +28,11 @@ export const listarProductos = async (req, res) => {
   }
 };
 
-// Modulo para busqueda de productos
 export const buscarProductos = (req, res) => {
   const { query } = req.body;
+
+  console.log('palabra del cleinte ---> ', query)
+  console.log('cuerpo ---> ', req.body)
 
   // Realizar la búsqueda
   Productos.findAll({
@@ -70,8 +62,6 @@ export const buscarProductos = (req, res) => {
       });
     });
 };
-
-// Modulo de subcategorias
 
 export const listarSubcategoria = async (req, res) => {
   try {
@@ -117,7 +107,6 @@ export const listarCategoria = async (req, res) => {
   try {
     const { codigo } = req.params;
 
-    // Buscar la categoría padre por su código
     const categoriasDb = await Categorias.findOne({
       where: { codigo },
       attributes: ["id", "nombre"],
@@ -127,7 +116,6 @@ export const listarCategoria = async (req, res) => {
       return res.status(404).json({ error: "Categoría no encontrada" });
     }
 
-    // Buscar los productos asociados a la categoría padre
     const productos = await Productos.findAll({
       where: { categoria_id: categoriasDb.id },
       attributes: [

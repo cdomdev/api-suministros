@@ -24,13 +24,7 @@ export const obtenerDatosUsuario = async (req, res) => {
 
 export const actulizarDatosDeUsuario = async (req, res) => {
   const { email, dataUpdate } = req.body;
-
-  if (!req.user) {
-    res.status(403).json({ message: "No hay token" });
-  }
-
   try {
-    // Validar la existencia del usuario en la base de datos
     const existingUser = await userExisting(email);
 
     if (!existingUser) {
@@ -41,30 +35,29 @@ export const actulizarDatosDeUsuario = async (req, res) => {
 
     // Verificar si la actualización fue exitosa
     if (updatedUser[0] === 1) {
-      // La actualización fue exitosa
-      // Obtener los nuevos datos del usuario actualizado
       const newUser = await User.findOne({ where: { email: email } });
-      const {
-        id,
-        name,
-        role,
-        telefono,
-        email: userEmail,
-        token,
-        direccion,
-        picture,
-      } = newUser;
-      return res.status(200).json({
-        message: "Datos actualizados correctamente",
-        id: id,
-        name: name,
-        role: role,
-        token: token,
-        email: userEmail,
-        telefono: telefono,
-        direccion: direccion,
-        picture: picture,
+      const userSessionData = JSON.stringify({
+        id: newUser.id,
+        nombre: newUser.nombre,
+        email: newUser.email,
+        telefono: newUser.telefono,
+        direccion: newUser.direccion,
+        role: newUser.roles.rol_name,
+        picture: newUser.picture
       });
+      return res
+        .status(200)
+        .cookie("user_sesion", userSessionData, {
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          maxAge: 1000 * 60 * 60 * 24 * 7
+        })
+        .json({
+          success: true,
+          message: `OK`,
+        });
+
+
     } else {
       // No se pudo actualizar el usuario
       return res

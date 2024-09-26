@@ -13,7 +13,6 @@ const transporter = nodemailer.createTransport({
 
 const sendMail = async (destinatario, asunto, contenido) => {
   try {
-    // Define la información del correo electrónico
     const mailOptions = {
       from: USER_MAIL,
       to: destinatario,
@@ -21,7 +20,6 @@ const sendMail = async (destinatario, asunto, contenido) => {
       html: contenido
     };
 
-    // Envía el correo electrónico
     const info = await transporter.sendMail(mailOptions);
     console.log('Correo electrónico enviado:', info.response);
   } catch (error) {

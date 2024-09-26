@@ -28,7 +28,7 @@ export const balances = async (req, res) => {
     res.status(200).json({
       users: totalUsers,
       totalOrders,
-      totalSales: totalVendido.toFixed(2),
+      totalSales: totalVendido,
       totalPending: totalPending.length,
       totalShipped: totolShipped.length,
     });
@@ -85,9 +85,7 @@ export const calcularTotalVendido = (ordersWithDetails) => {
   try {
     let totalSales = 0;
     for (const order of ordersWithDetails) {
-      for (const detalle of order.detalles_pedido) {
-        totalSales += parseFloat(detalle.total_pago);
-      }
+      totalSales += parseFloat(order.pago_total);
     }
     return totalSales;
   } catch (error) {
@@ -131,18 +129,12 @@ export const ordersShipped = (ordersList) => {
 
 export const mostSalledsProducts = async (req, res) => {
   try {
-    if (req.user.role !== "admin") {
-      return res
-        .status(403)
-        .json({ success: false, message: "Acceso no autorizado" });
-    }
 
     // Obtener los productos más vendidos
     const products = await Productos.findAll({
       order: [["sales_count", "DESC"]],
       limit: 5,
     });
-
     // Enviar la lista de productos
     return res.status(200).json({ success: true, data: products });
   } catch (error) {
@@ -160,6 +152,9 @@ export const salesMonth = async (req, res) => {
     const ventasUsuarios = await listUsersWithOrders(users, "usuario_id");
     const ventasInvitados = await listUsersWithOrders(invited, "invitado_id");
 
+    console.log('indicador -----> ')
+    console.log(ventasInvitados)
+    console.log(ventasUsuarios)
     // Aplanar los arrays y combinarlos
     const ventas = [...ventasUsuarios.flat(), ...ventasInvitados.flat()];
 
@@ -174,7 +169,7 @@ export const salesMonth = async (req, res) => {
 const listUser = async () => {
   try {
     const usuarios = await User.findAll({
-      attributes: ["id", "name", "email", "picture"],
+      attributes: ["id", "nombre", "email", "picture"],
     });
 
     return usuarios || [];
@@ -199,11 +194,12 @@ const listUsersWithOrders = async (users, conditionKey) => {
     users.map(async (user) => {
       const pedidos = await Pedido.findAll({
         where: { [conditionKey]: user.id },
+        attributes: ["id", "pago_total"],
         include: [
           {
             model: DetallesPedido,
             as: "detalles_pedido",
-            attributes: ["id", "total_pago", "createdAt"],
+            attributes: ["id", "createdAt"],
           },
         ],
       });

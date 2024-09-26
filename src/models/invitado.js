@@ -1,6 +1,5 @@
 import { DataTypes } from "sequelize";
 import { conecction } from "../../database/conecction.js";
-import { Pedido } from "./pedido.js";
 
 export const Invitado = conecction.define(
   "invitado",
@@ -34,6 +33,14 @@ export const Invitado = conecction.define(
     detalles: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    ciudad: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    departamento: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
   },
   {
