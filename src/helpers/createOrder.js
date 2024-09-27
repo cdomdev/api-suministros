@@ -3,6 +3,7 @@ import crypto from "crypto";
 import { createDetailsOrders } from './createDetailsOrdes.js'
 import { calcularTotal } from "../utils/valoresDeProductos.js";
 import { updateDataUser } from "./updateDataUser.js";
+import { OrderNotFountError } from "./errorsInstances.js";
 
 export const createOrderMercadopagoInvited = async (userId, productos, valorDeEnvio, transaction) => {
     try {
@@ -17,7 +18,7 @@ export const createOrderMercadopagoInvited = async (userId, productos, valorDeEn
         }, { transaction });
 
         if (!nuevoPedido) {
-            throw new Error("Error al crear el pedido");
+            throw new OrderNotFountError("Error al crear el pedido");
         }
 
         await createDetailsOrders(productos, nuevoPedido, transaction);
@@ -26,7 +27,6 @@ export const createOrderMercadopagoInvited = async (userId, productos, valorDeEn
         throw new Error("Error en la creación del pedido: " + error.message);
     }
 };
-
 
 export const createOrderMercadopagoUser = async (userId, productos, valorDeEnvio, transaction) => {
     try {
@@ -41,7 +41,7 @@ export const createOrderMercadopagoUser = async (userId, productos, valorDeEnvio
         }, { transaction });
 
         if (!nuevoPedido) {
-            throw new Error("Error al crear el pedido");
+            throw new OrderNotFountError("Error al crear el pedido");
         }
 
         await createDetailsOrders(productos, nuevoPedido, transaction);
@@ -68,7 +68,7 @@ export const createOrderUser = async (userId, datos, productos, valorDeEnvio, tr
         }, { transaction });
 
         if (!nuevoPedido) {
-            throw new Error("Error al crear el pedido");
+            throw new OrderNotFountError("Error al crear el pedido");
         }
 
         await createDetailsOrders(productos, nuevoPedido, transaction);
@@ -77,7 +77,6 @@ export const createOrderUser = async (userId, datos, productos, valorDeEnvio, tr
         throw new Error("Error en la creación del pedido: " + error.message);
     }
 };
-
 
 
 export const createOrderinvited = async (userId, productos, valorDeEnvio, transaction) => {
@@ -94,7 +93,7 @@ export const createOrderinvited = async (userId, productos, valorDeEnvio, transa
         }, { transaction });
 
         if (!nuevoPedido) {
-            throw new Error("Error al crear el pedido");
+            throw new OrderNotFountError("Error al crear el pedido");
         }
 
         await createDetailsOrders(productos, nuevoPedido, transaction);

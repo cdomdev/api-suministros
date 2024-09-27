@@ -3,13 +3,15 @@ import { sendMailsCompraMercadoPago } from "../../../templates/emailTemplatesJs/
 import { findOrCreateInvited } from "../../helpers/invitadoHelper.js";
 import { createMercadoPagoPreferenceInvited } from "../../helpers/mercadoPagoHelper.js";
 import { createOrderMercadopagoInvited } from '../../helpers/createOrder.js'
+import {ErrorServer, MissingDataError, OrderNotFountError} from '../../helpers/errorsInstances.js'
 
 export const createPreferenceInvited = async (req, res) => {
   const { productos, datos, valorDeEnvio } = req.body;
-
+  const t = await conecction.transaction();
   try {
+
     if (!productos || !datos || !valorDeEnvio) {
-      return res.status(400).json({ message: "Faltan datos para procesar el pago" });
+      throw new MissingDataError("Faltan datos para procesar el pago");
     }
 
     const user = await findOrCreateInvited(datos);
@@ -19,6 +21,8 @@ export const createPreferenceInvited = async (req, res) => {
     const mercadoPagoItems = await createItemsMercadoPago(productos, valorDeEnvio);
 
     const preferenceMercadopago = await createMercadoPagoPreferenceInvited(mercadoPagoItems, nuevoPedido.id);
+    
+    await t.commit();
 
     setTimeout(() => {
       sendMailsCompraMercadoPago(0, user, productos, valorDeEnvio);
@@ -31,7 +35,14 @@ export const createPreferenceInvited = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Error al crear la preferencia:", error);
-    return res.status(501).json({ message: "Error en el servidor" });
+    await t.rollback();
+    if(error instanceof MissingDataError){
+      return res.status(error.statusCode).json({ message: error.message });
+    }else if(error instanceof OrderNotFountError){
+      return res.status(error.statusCode).json({ message: error.message });
+    }else{
+      console.error("Error en el controlador de finalizar compra invitado:", error);
+      return res.status(500).json({ error: new ErrorServer().message});
+    }
   }
 };

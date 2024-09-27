@@ -3,14 +3,17 @@ import { conecction } from "../../../database/conecction.js";
 import { createNotifications } from "../../helpers/notifications.js";
 import { findOrCreateInvited } from "../../helpers/invitadoHelper.js";
 import { createOrderUser, createOrderinvited } from '../../helpers/createOrder.js'
-import { finOrUpdateDataUser } from "../../helpers/userHelper.js";
+import { findOrUpdateDataUser } from "../../helpers/userHelper.js";
+import {ErrorServer, MissingDataError, OrderNotFountError} from '../../helpers/errorsInstances.js'
+
 
 export const finalizarCompraInvitado = async (req, res) => {
   const { productos, datos, valorDeEnvio } = req.body;
   const t = await conecction.transaction();
+
   try {
     if (!productos || !datos || !valorDeEnvio) {
-      return res.status(400).json({ message: "Faltan datos para procesar el pago" });
+      throw new MissingDataError("Faltan datos para procesar el pago");
     }
 
     const usuarioInvitado = await findOrCreateInvited(datos);
@@ -26,8 +29,14 @@ export const finalizarCompraInvitado = async (req, res) => {
     return res.status(200).json({ message: "Compra realizada con exito" });
   } catch (e) {
     await t.rollback();
-    console.log("Error al finalizar la compra", e);
-    return res.status(502).json({ message: "Error interno en el servidor" });
+    if(error instanceof MissingDataError){
+      return res.status(error.statusCode).json({ message: error.message });
+    }else if(error instanceof OrderNotFountError){
+      return res.status(error.statusCode).json({ message: error.message });
+    }else{
+      console.error("Error en el controlador de finalizar compra invitado:", error);
+      return res.status(500).json({ error: new ErrorServer().message});
+    }
   }
 };
 
@@ -37,10 +46,10 @@ export const finalizarCompraUsuario = async (req, res) => {
   try {
 
     if (!productos || !datos || !valorDeEnvio) {
-      return res.status(400).json({ message: "Faltan datos de la compra" });
+      throw new MissingDataError("Faltan datos para procesar el pago");
     }
 
-    const user = await finOrUpdateDataUser(datos)
+    const user = await findOrUpdateDataUser(datos)
 
     await createOrderUser(user.id, datos, productos, valorDeEnvio, t)
 
@@ -54,7 +63,13 @@ export const finalizarCompraUsuario = async (req, res) => {
 
   } catch (error) {
     await t.rollback();
-    console.error("Error al finalizar la compra", error);
-    return res.status(500).json({ message: "Error interno en el servidor" });
+    if(error instanceof MissingDataError){
+      return res.status(error.statusCode).json({ message: error.message });
+    }else if(error instanceof OrderNotFountError){
+      return res.status(error.statusCode).json({ message: error.message });
+    }else{
+      console.error("Error en el controlador de finalizar compra usuario:", error);
+      return res.status(500).json({ error: new ErrorServer().message});
+    }
   }
 };
