@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { generateAccessToken } from "../../utils/createTokensSesion.js";
+import { generateAccessToken } from "../../helpers/createTokensSesion.js";
 import { Roles, User } from "../../models/index.js";
 
 const secretRefresToken = process.env.CLAVE_FOR_TOKEN_REFRESH;
@@ -36,8 +36,8 @@ export const refreshToken = async (req, res) => {
       .cookie("access_token", newAccessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 1000 * 60 * 15,
+        sameSite: "lax",
+        maxAge: 1000 * 60 * 60,
       })
       .json({ success: true, accessToken: newAccessToken });
   } catch (error) {

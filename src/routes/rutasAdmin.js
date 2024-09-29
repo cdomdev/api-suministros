@@ -3,7 +3,7 @@ import { imageUpload } from "../utils/imageUpload.js";
 import { saveImagenServer } from "../controllers/admin/saveImageServer.js";
 import { guardarProducto } from "../controllers/admin/saveProducts.js";
 import { authenticateToken } from "../middleware/authenticateToken.js";
-import { logout } from "../controllers/admin/logoutAdmin.js";
+import { loginAdmin, logout, registerAdmin } from '../controllers/admin/auth.js'
 import {
   listarPedidoPorUsuario,
   listarPedidoPorInvitado,
@@ -49,6 +49,11 @@ import {
 } from "../controllers/admin/notificationsAdmin.js";
 
 export const routerAdmin = express.Router();
+
+
+routerAdmin.post("/auth-admin", loginAdmin);
+
+routerAdmin.post("/admin-register", registerAdmin);
 
 // productos guardar
 routerAdmin.post("/save-news-products", authenticateToken, guardarProducto);
@@ -120,15 +125,20 @@ routerAdmin.put("/oferta/update/:id", authenticateToken, actulizarOfertas);
 
 // listar pedido
 
-routerAdmin.get("/listar/usuarios-con-pedidos", listarPedidos);
-routerAdmin.get("/listar/pedidos-usuario/:id", listarPedidoPorUsuario);
-routerAdmin.get("/listar/pedidos-invitado/:id", listarPedidoPorInvitado);
+routerAdmin.get("/listar/usuarios-con-pedidos", authenticateToken, listarPedidos);
+routerAdmin.get("/listar/pedidos-usuario/:id",
+  authenticateToken,
+  listarPedidoPorUsuario);
+routerAdmin.get("/listar/pedidos-invitado/:id",
+  authenticateToken,
+  listarPedidoPorInvitado);
 
 routerAdmin.post(
   "/update/state-orders/:id",
   authenticateToken,
   updateStateOrders
 );
+
 routerAdmin.post("/logout", logout);
 
 // balances

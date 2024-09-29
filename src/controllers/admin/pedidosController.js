@@ -26,6 +26,7 @@ export const listarPedidos = async (req, res) => {
 
 export const listarPedidosUsuarios = async () => {
   try {
+
     // Obtener todos los usuarios
     const usuarios = await User.findAll({
       attributes: ["id", "nombre", "email", "telefono", "direccion", "detalles"],
@@ -47,13 +48,12 @@ export const listarPedidosUsuarios = async () => {
     return usuariosConPedidos;
   } catch (error) {
     console.log(error);
-    res.status(404).json({ error: "Error al obtener usuarios con pedidos" });
+    throw error
   }
 };
 
 export const listarPedidosInvitados = async () => {
   try {
-    // Obtener todos los usuarios
     const invitados = await Invitado.findAll({
       attributes: [
         "id",
@@ -62,27 +62,25 @@ export const listarPedidosInvitados = async () => {
         "telefono",
         "direccion",
         "detalles",
+        "ciudad",
+        "departamento"
       ],
     });
 
-    // Obtener el número de pedidos para cada usuario y agregar el indicador a la respuesta
     const invitadosConPedidos = await listUsersWithOrders(
       invitados,
       "invitado_id"
     );
-
-    // asignar rol para listado en cliente
 
     const invitadosConPedidosMasRole = invitadosConPedidos.map((invitado) => ({
       ...invitado,
       role: "invitado",
     }));
 
-    // Enviar la lista de usuarios con el indicador de pedidos en la respuesta
     return invitadosConPedidosMasRole;
   } catch (error) {
     console.log(error);
-    res.status(404).json({ error: "Error al obtener usuarios con pedidos" });
+    throw error
   }
 };
 
@@ -91,7 +89,7 @@ export const listarPedidoPorUsuario = async (req, res) => {
   try {
     const pedidos = await Pedido.findAll({
       where: { usuario_id: id },
-      attributes: ["id"],
+      attributes: ["id", "metodo_de_pago", "estado_pedido", "costo_de_envio", "status_mercadopago", "pago_total",],
       include: [
         {
           model: DetallesPedido,
@@ -101,13 +99,7 @@ export const listarPedidoPorUsuario = async (req, res) => {
             "precio_unitario",
             "sub_total",
             "cantidad",
-            "total_pago",
-            "metodo_pago",
             "descuento",
-            "estado_pedido",
-            "descuento",
-            "costo_de_envio",
-            "status_detail",
             "createdAt",
           ],
           include: [
@@ -121,7 +113,7 @@ export const listarPedidoPorUsuario = async (req, res) => {
     });
 
     if (pedidos.length === 0) {
-      res.status(404).json({ message: "El usuario no tiene pedidos" });
+      return res.status(404).json({ message: "El usuario no tiene pedidos" });
     }
 
     res.status(200).json({ pedidos });
@@ -137,7 +129,7 @@ export const listarPedidoPorInvitado = async (req, res) => {
   try {
     const pedidos = await Pedido.findAll({
       where: { invitado_id: id },
-      attributes: ["id"],
+      attributes: ["id", "metodo_de_pago", "estado_pedido", "costo_de_envio", "status_mercadopago", "pago_total",],
       include: [
         {
           model: DetallesPedido,
@@ -147,13 +139,7 @@ export const listarPedidoPorInvitado = async (req, res) => {
             "precio_unitario",
             "sub_total",
             "cantidad",
-            "total_pago",
-            "metodo_pago",
             "descuento",
-            "estado_pedido",
-            "descuento",
-            "costo_de_envio",
-            "status_detail",
             "createdAt",
           ],
           include: [
@@ -165,8 +151,9 @@ export const listarPedidoPorInvitado = async (req, res) => {
         },
       ],
     });
+
     if (pedidos.length === 0) {
-      res.status(404).json({ message: "El usuario no tiene pedidos" });
+      return res.status(404).json({ message: "El usuario no tiene pedidos" });
     }
 
     res.status(200).json({ pedidos });
@@ -195,14 +182,11 @@ const listUsersWithOrders = async (users, conditionKey) => {
 };
 
 export const updateStateOrders = async (req, res) => {
-  // if (req.user.role !== "admin") {
-  //   return res
-  //     .status(403)
-  //     .json({ success: false, message: "Acceso no autorizado" });
-  // }
-
   const { id } = req.params;
   const { estado } = req.body;
+
+  console.log(id)
+  console.log(estado)
   try {
     if (!estado || !id) {
       return res
@@ -210,9 +194,9 @@ export const updateStateOrders = async (req, res) => {
         .json({ message: "faltan datos para actulizar el estado" });
     }
 
-    const updatedRows = await DetallesPedido.update(
+    const updatedRows = await Pedido.update(
       { estado_pedido: estado },
-      { where: { pedido_id: id } }
+      { where: { id: id } }
     );
 
     if (updatedRows[0] === 1) {

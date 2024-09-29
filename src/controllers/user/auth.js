@@ -1,8 +1,8 @@
 import axios from "axios";
 import crypto from "crypto";
-
 import { promisify } from "util";
 import { getUserDataFromGoogle } from "../../helpers/getUserDataFromGoogle.js";
+import { conecction } from "../../../database/conecction.js";
 import {
   sendMailsRegistro,
   sendMailsRecover,
@@ -11,7 +11,7 @@ import {
 import {
   generateAccessToken,
   generateRefreshToken,
-} from "../../utils/createTokensSesion.js";
+} from "../../helpers/createTokensSesion.js";
 import { createNewUser, findOrCreateUserGoogle, resetDataPassword, validatedUser } from "../../helpers/userHelper.js";
 import { ErrorServer, InvalidatedPasswordError, MissingDataError, UserExisting, UserNotFountError } from "../../helpers/errorsInstances.js";
 import { findUser } from "../../helpers/findUser.js";
@@ -84,20 +84,21 @@ export const googleLogin = async (req, res) => {
       });
   } catch (error) {
     console.error('Error en el proceso de inicio de sesión con Google:', error);
-    return res.status(500).json({ error: new ErrorServer().message});
+    return res.status(500).json({ error: new ErrorServer().message });
   }
 };
 
 export const registroController = async (req, res) => {
   const { nombre, email, password } = req.body;
   const t = await conecction.transaction();
+
   try {
 
     if (!nombre || !email || !password) {
-     throw new MissingDataError('Faltan datos para proceder con el registro')
+      throw new MissingDataError('Faltan datos para proceder con el registro')
     }
 
-    await createNewUser(nombre, email, password,  t);
+    await createNewUser(nombre, email, password, t);
 
     await t.commit();
 
@@ -107,13 +108,13 @@ export const registroController = async (req, res) => {
 
   } catch (error) {
     await t.rollback();
-    if(error instanceof MissingDataError){
+    if (error instanceof MissingDataError) {
       return res.status(error.statusCode).json({ message: error.message });
-    }else if(error instanceof UserExisting){
-      return res.status(error.statusCode).json({ message: error.message });
-    }else{
+    } else if (error instanceof UserExisting) {
+      return res.status(error.statusCode).json({ message: 'Ya existe un usuario con esa informacion' });
+    } else {
       console.error("Error en el registro de un nuevo usuario:", error);
-      return res.status(500).json({ error: new ErrorServer().message});
+      return res.status(500).json({ error: new ErrorServer().message });
     }
   }
 };
@@ -121,8 +122,8 @@ export const registroController = async (req, res) => {
 export const loginController = async (req, res) => {
   const { email, password } = req.body
 
-  if(!email || password){
-    throw new MissingDataError('Faltan datos para proceder con el registro')
+  if (!email || !password) {
+    throw new MissingDataError('Faltan datos para proceder con en inicio de sesion')
   }
 
   try {
@@ -174,25 +175,23 @@ export const loginController = async (req, res) => {
         picture: user.picture
       });
   } catch (error) {
-    if(error instanceof MissingDataError){
+    if (error instanceof MissingDataError) {
       return res.status(error.statusCode).json({ message: error.message });
-    }else if(error instanceof UserNotFountError){
+    } else if (error instanceof UserNotFountError) {
       return res.status(error.statusCode).json({ message: error.message });
-    }else if (error instanceof InvalidatedPasswordError) {
-      return res.status(401).json({ message: error.message });
-    }else{
+    } else if (error instanceof InvalidatedPasswordError) {
+      return res.status(error.statusCode).json({ message: error.message });
+    } else {
       console.error("Error en el controlador de inicio de sesión:", error);
-      return res.status(500).json({ error: new ErrorServer().message});
+      return res.status(500).json({ error: new ErrorServer().message });
     }
   }
 };
 
-
-
 export const validateEmail = async (req, res) => {
   const { email } = req.body;
 
-  if(!email){
+  if (!email) {
     throw new MissingDataError('Faltan datos para procesar la solicitud')
   }
   try {
@@ -220,13 +219,13 @@ export const validateEmail = async (req, res) => {
     });
 
   } catch (error) {
-    if(error instanceof MissingDataError){
+    if (error instanceof MissingDataError) {
       return res.status(error.statusCode).json({ message: error.message });
-    }else if(error instanceof UserNotFountError){
+    } else if (error instanceof UserNotFountError) {
       return res.status(error.statusCode).json({ message: error.message });
-    }else{
+    } else {
       console.error("Error al intentar restablcer la contraseña:", error);
-      return res.status(500).json({ error: new ErrorServer().message});
+      return res.status(500).json({ error: new ErrorServer().message });
     }
   }
 };
@@ -245,15 +244,15 @@ export const resetPassword = async (req, res) => {
     sendMailForgotSucess(user.name, user.email);
     res
       .status(200)
-      .json({ message: "Contraseña restablecida con éxito"});
+      .json({ message: "Contraseña restablecida con éxito" });
   } catch (error) {
-    if(error instanceof MissingDataError){
+    if (error instanceof MissingDataError) {
       return res.status(error.statusCode).json({ message: error.message });
-    }else if(error instanceof UserNotFountError){
+    } else if (error instanceof UserNotFountError) {
       return res.status(error.statusCode).json({ message: error.message });
-    }else{
+    } else {
       console.error("Error en el controlador de inicio de sesión:", error);
-      return res.status(500).json({ error: new ErrorServer().message});
+      return res.status(500).json({ error: new ErrorServer().message });
     }
   }
 };
@@ -269,6 +268,6 @@ export const logout = (req, res) => {
       .json({ message: "Logout successful" });
   } catch (error) {
     console.log("Error during logout ", error);
-    return res.status(500).json({ error: new ErrorServer().message});
+    return res.status(500).json({ error: new ErrorServer().message });
   }
 };

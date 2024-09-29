@@ -97,10 +97,8 @@ export const PendingOrder = (ordersList) => {
   try {
     let totalPending = [];
     for (const order of ordersList) {
-      for (const detalle of order.detalles_pedido) {
-        if (detalle.estado_pedido !== "entregado") {
-          totalPending.push(detalle);
-        }
+      if (order.estado_pedido !== "entregado") {
+        totalPending.push(order);
       }
     }
     return totalPending;
@@ -111,21 +109,19 @@ export const PendingOrder = (ordersList) => {
 
 export const ordersShipped = (ordersList) => {
   try {
-  } catch (error) {
-    console.log("Error al obtener los pedidos entregados", error);
-  }
-  let totalShipped = [];
-  for (const order of ordersList) {
-    for (const detalle of order.detalles_pedido) {
-      if (detalle.estado_pedido === "entregado") {
-        totalShipped.push(detalle);
+    let totalShipped = [];
+    for (const order of ordersList) {
+      if (order.estado_pedido === "entregado") {
+        totalShipped.push(order);
       }
     }
+    return totalShipped;
+  } catch (error) {
+    console.log("Error al obtener los pedidos entregados", error);
+    throw error
   }
-  return totalShipped;
-};
 
-// listado de productos mas vendidos
+};
 
 export const mostSalledsProducts = async (req, res) => {
   try {
@@ -145,20 +141,16 @@ export const mostSalledsProducts = async (req, res) => {
 // listado de ventas por mes
 export const salesMonth = async (req, res) => {
   try {
+
     const users = await listUser();
     const invited = await listInvited();
 
-    // Listar pedidos para usuarios e invitados
     const ventasUsuarios = await listUsersWithOrders(users, "usuario_id");
     const ventasInvitados = await listUsersWithOrders(invited, "invitado_id");
 
-    console.log('indicador -----> ')
-    console.log(ventasInvitados)
-    console.log(ventasUsuarios)
-    // Aplanar los arrays y combinarlos
+
     const ventas = [...ventasUsuarios.flat(), ...ventasInvitados.flat()];
 
-    // Enviar la respuesta correcta
     res.status(200).json(ventas);
   } catch (error) {
     console.log("Error en el listado de ventas por mes:", error);

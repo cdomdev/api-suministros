@@ -30,7 +30,6 @@ import { feedBack, reciveWebhook } from "../controllers/user/webhooks.js";
 
 import { createPreferenceUser } from "../controllers/user/createPreferenceUser.js";
 import { createPreferenceInvited } from "../controllers/user/createPreferenceInvited.js";
-import { authenticateToken } from "../middleware/authenticateToken.js";
 
 export const routerUser = express.Router();
 
@@ -40,13 +39,14 @@ routerUser.post("/user/login", loginController);
 // autenticacion
 routerUser.post("/user/logout", logout);
 
-
 // refresh token
 
 routerUser.post("/refresh-token", refreshToken);
 // resgistro
 routerUser.post("/user/register", registroController);
+
 // autenticacion y regsitro con google
+
 routerUser.post("/user/google-auth", googleLogin);
 // restablecer contraseña
 routerUser.post("/reset-password/:token", resetPassword);
