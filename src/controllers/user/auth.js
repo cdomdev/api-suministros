@@ -1,7 +1,6 @@
 import axios from "axios";
 import crypto from "crypto";
 import { promisify } from "util";
-import { getUserDataFromGoogle } from "../../helpers/getUserDataFromGoogle.js";
 import { conecction } from "../../../database/conecction.js";
 import {
   sendMailsRegistro,
@@ -12,12 +11,10 @@ import {
   generateAccessToken,
   generateRefreshToken,
 } from "../../helpers/createTokensSesion.js";
-import { createNewUser, findOrCreateUserGoogle, resetDataPassword, validatedUser } from "../../helpers/userHelper.js";
+import { createNewUser, findOrCreateUserGoogle, resetDataPassword, validatedUser, findUser, getUserDataFromGoogle } from "../../helpers/userHelper.js";
 import { ErrorServer, InvalidatedPasswordError, MissingDataError, UserExisting, UserNotFountError } from "../../helpers/errorsInstances.js";
-import { findUser } from "../../helpers/findUser.js";
+
 const randomBytesAsync = promisify(crypto.randomBytes);
-
-
 
 export const googleLogin = async (req, res) => {
   const { token } = req.body;

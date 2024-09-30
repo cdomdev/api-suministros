@@ -4,6 +4,8 @@ import {
 } from "../../helpers/getDataPaymenMercadoPago.js";
 import path from "path";
 
+
+
 export const reciveWebhook = async (req, res) => {
   try {
     if (req.body.type === "payment") {
@@ -13,7 +15,6 @@ export const reciveWebhook = async (req, res) => {
       await handleMerchantOrderNotification(req.body, res);
       return res.status(200);
     } else {
-      // Responde con un estado que indique que no has procesado el webhook
       return res.status(400).send("Webhook not processed");
     }
   } catch (error) {
@@ -22,7 +23,9 @@ export const reciveWebhook = async (req, res) => {
   }
 };
 
+
 const __dirname = path.resolve();
+
 
 export const feedBack = async (req, res) => {
   try {

@@ -2,7 +2,7 @@ import { sendMailsCompra } from "../../../templates/emailTemplatesJs/index.js";
 import { conecction } from "../../../database/conecction.js";
 import { createNotifications } from "../../helpers/notifications.js";
 import { findOrCreateInvited } from "../../helpers/invitadoHelper.js";
-import { createOrderUser, createOrderinvited } from '../../helpers/createOrder.js'
+import { createOrderUser, createOrderinvited } from '../../helpers/ordersHelperss.js'
 import { findOrUpdateDataUser } from "../../helpers/userHelper.js";
 import {ErrorServer, MissingDataError, OrderNotFountError} from '../../helpers/errorsInstances.js'
 

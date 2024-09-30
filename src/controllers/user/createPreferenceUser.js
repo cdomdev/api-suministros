@@ -1,6 +1,6 @@
 import { sendMailsCompraMercadoPago } from "../../../templates/emailTemplatesJs/index.js";
 import { createItemsMercadoPago } from "../../utils/createItemsMercadoPago.js";
-import { findUser } from "../../helpers/findUser.js";
+import { findUser } from "../../helpers/userHelper.js";
 import { createOrderMercadopagoUser } from "../../helpers/createOrder.js";
 import { createMercadoPagoPreferenceUser } from "../../helpers/mercadoPagoHelper.js";
 import {ErrorServer, MissingDataError, OrderNotFountError} from '../../helpers/errorsInstances.js'

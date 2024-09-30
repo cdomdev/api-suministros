@@ -1,40 +1,27 @@
-import { Pedido, DetallesPedido, Productos } from "../../models/index.js";
+import {MissingDataError, ErrorServer, NotFountError} from '../../helpers/errorsInstances.js'
+import { getPedidosUser } from "../../helpers/ofertasHelpers.js";
 
 export const listarPedidoPorUsuario = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const pedidos = await Pedido.findAll({
-      where: { usuario_id: id },
-      attributes: ["id", "costo_de_envio", "pago_total", "estado_pedido",],
-      include: [
-        {
-          model: DetallesPedido,
-          as: "detalles_pedido",
-          attributes: [
-            "id",
-            "precio_unitario",
-            "sub_total",
-            "cantidad",
-            "descuento"
-          ],
-          include: [
-            {
-              model: Productos,
-              attributes: ["id", "nombre", "image", "referencia", "valor"],
-            },
-          ],
-        },
-      ],
-    });
-
-    if (!pedidos || pedidos.length === 0) {
-      return res.status(404).json({ message: "El usuario no tiene pedidos" });
+    
+    if(!id){
+      throw new MissingDataError("El id del usuario es requerido");
     }
 
+    const pedidos = await getPedidosUser(id)
+
     res.status(200).json({ pedidos });
+
   } catch (e) {
-    res.status(500).json({ message: "Error en el servidor", e });
-    console.log(e);
+    if(error instanceof MissingDataError){
+      return res.status(error.statusCode).json({ message: error.message });
+    }else if(error instanceof NotFountError){
+      return res.status(error.statusCode).json({ message: error.message });
+    }else{
+      console.error("Error al listar los pedidos del usuario:", error);
+      return res.status(500).json({ error: new ErrorServer().message});
+    }
   }
 };

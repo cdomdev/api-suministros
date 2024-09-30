@@ -1,6 +1,18 @@
 import { Invitado } from "../models/invitado.js";
 import { findInvited } from "./findUser.js";
 
+export const findInvited = async (email) => {
+    try {
+        return await Invitado.findOne({
+            where: { email: email },
+        })
+    } catch (error) {
+        throw new Error('Error en la búsqueda del usuario' + error.message);
+    }
+}
+
+
+
 export const findOrCreateInvited = async (datos) => {
     try {
         let userDb = await findInvited(datos.email);

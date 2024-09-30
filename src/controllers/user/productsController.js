@@ -1,193 +1,74 @@
-import Sequelize from "sequelize";
-import {
-  Productos,
-  Inventario,
-  Categorias,
-  Subcategorias,
-} from "../../models/index.js";
+import { findProducts, getProducts, getProductBy, getMoreSalledProducts } from "../../helpers/productosHelper.js";
+import { ErrorServer, NotFountError } from '../../helpers/errorsInstances.js'
+
 
 export const listarProductos = async (req, res) => {
   try {
-    const productos = await Productos.findAll({
-      attributes: [
-        "id",
-        "marca",
-        "nombre",
-        "valor",
-        "description",
-        "image",
-        "referencia",
-        "discount",
-      ],
 
-    });
+    const productos = await getProducts()
+
     res.json({ productos: productos });
+
   } catch (e) {
-    console.log(e);
-    res.status(500).json({ error: "Error al obtener los productos" });
+    console.error("Error al obtener el lisatdo de productos:", error);
+    return res.status(500).json({ error: new ErrorServer().message });
   }
 };
+
+
 
 export const buscarProductos = (req, res) => {
   const { query } = req.body;
-
-  console.log('palabra del cleinte ---> ', query)
-  console.log('cuerpo ---> ', req.body)
-
-  // Realizar la búsqueda
-  Productos.findAll({
-    where: {
-      nombre: Sequelize.where(
-        Sequelize.fn("LOWER", Sequelize.col("nombre")),
-        "LIKE",
-        `%${query.toLowerCase()}%`
-      ),
-    },
-  })
-    .then((resultados) => {
-      if (resultados && resultados.length > 0) {
-        return res
-          .status(200)
-          .json({ message: "Productos encontrados", resultados: resultados });
-      } else {
-        return res.status(404).json({
-          message: "No se encontraron productos para la búsqueda proporcionada",
-        });
-      }
-    })
-    .catch((err) => {
-      return res.status(500).json({
-        message: "Error en el servidor al buscar productos",
-        error: err,
-      });
-    });
-};
-
-export const listarSubcategoria = async (req, res) => {
   try {
-    const { codigo } = req.params;
-    console.log(`Código recibido: ${codigo}`);
 
-    // Buscar la categoría padre por su código
-    const categoriasDb = await Subcategorias.findOne({
-      where: { codigo },
-      attributes: ["id", "nombre"],
-    });
+    const resultados = findProducts(query)
 
-    if (!categoriasDb) {
-      return res.status(404).json({ error: "Categoría no encontrada" });
-    }
+    return res
+      .status(200)
+      .json({ resultados: resultados });
 
-    // Buscar los productos asociados a la categoría padre
-    const productos = await Productos.findAll({
-      where: { subcategoria_id: categoriasDb.id },
-      attributes: [
-        "id",
-        "marca",
-        "nombre",
-        "valor",
-        "description",
-        "image",
-        "referencia",
-        "discount",
-      ],
-    });
 
-    res.json({ productos });
   } catch (error) {
-    console.error(
-      "Error al obtener las subcategorías y sus productos asociados:",
-      error
-    );
-    res.status(500).json({ error: "Error interno del servidor" });
+    if (error instanceof NotFountError) {
+      return res.status(error.statusCode).json({ message: error.message });
+    } else {
+      console.error("Error al obtener el lisatdo de productos:", error);
+      return res.status(500).json({ error: new ErrorServer().message });
+    }
   }
 };
 
-export const listarCategoria = async (req, res) => {
-  try {
-    const { codigo } = req.params;
 
-    const categoriasDb = await Categorias.findOne({
-      where: { codigo },
-      attributes: ["id", "nombre"],
-    });
-
-    if (!categoriasDb) {
-      return res.status(404).json({ error: "Categoría no encontrada" });
-    }
-
-    const productos = await Productos.findAll({
-      where: { categoria_id: categoriasDb.id },
-      attributes: [
-        "id",
-        "marca",
-        "nombre",
-        "valor",
-        "description",
-        "image",
-        "referencia",
-        "discount",
-      ],
-      include: [
-        {
-          model: Subcategorias,
-          attributes: ["id", "nombre"],
-        },
-      ],
-    });
-
-    res.json({ productos });
-  } catch (error) {
-    console.error(
-      "Error al obtener las categorías y sus productos asociados:",
-      error
-    );
-    res.status(500).json({ error: "Error interno del servidor" });
-  }
-};
 
 export const masVendidos = async (req, res) => {
   try {
-    // Obtener los productos más vendidos
-    const products = await Productos.findAll({
-      order: [["sales_count", "DESC"]],
-      limit: 4,
-      attributes: [
-        "id",
-        "marca",
-        "nombre",
-        "valor",
-        "description",
-        "image",
-        "referencia",
-        "discount",
-      ],
-    });
 
-    // Enviar la lista de productos
-    return res.status(200).json({ productos: products });
+    const productos = await getMoreSalledProducts();
+
+    return res.status(200).json({ productos: productos });
   } catch (error) {
     console.log("Error al obtener las lista de productos mas vendidos", error);
+    return res.status(500).json({ error: new ErrorServer().message });
   }
 };
 
-export const listarProductoID = async (req, res) => {
-  try {
-    const { id } = req.params;
-    // Buscar la categoría padre por su código
-    const producto = await Productos.findOne({
-      where: { id }
-    });
 
-    if (!producto) {
-      return res.status(404).json({ error: "Producto no encontrado" });
-    }
-    res.json({ producto });
+
+export const listarProductoID = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+
+    const producto = await getProductBy(id)
+
+    res.status(200).json({ producto });
+
   } catch (error) {
-    console.error(
-      "Error al obtener las categorías y sus productos asociados:",
-      error
-    );
-    res.status(500).json({ error: "Error interno del servidor" });
+    if (error instanceof NotFountError) {
+      return res.status(error.statusCode).json({ message: error.message });
+    } else {
+      console.error("Error al obtener el producto por su id:", error);
+      return res.status(500).json({ error: new ErrorServer().message });
+    }
   }
 };

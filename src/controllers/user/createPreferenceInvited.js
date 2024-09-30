@@ -2,7 +2,7 @@ import { createItemsMercadoPago } from "../../utils/createItemsMercadoPago.js";
 import { sendMailsCompraMercadoPago } from "../../../templates/emailTemplatesJs/index.js";
 import { findOrCreateInvited } from "../../helpers/invitadoHelper.js";
 import { createMercadoPagoPreferenceInvited } from "../../helpers/mercadoPagoHelper.js";
-import { createOrderMercadopagoInvited } from '../../helpers/createOrder.js'
+import { createOrderMercadopagoInvited } from '../../helpers/ordersHelperss.js'
 import {ErrorServer, MissingDataError, OrderNotFountError} from '../../helpers/errorsInstances.js'
 
 export const createPreferenceInvited = async (req, res) => {

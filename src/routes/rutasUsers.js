@@ -1,12 +1,11 @@
 import express from "express";
 import {
   buscarProductos,
-  listarCategoria,
   listarProductoID,
   listarProductos,
-  listarSubcategoria,
   masVendidos,
 } from "../controllers/user/productsController.js";
+import {listarCategoria, listarSubcategoria} from '../controllers/user/categoriasController.js'
 import {
   finalizarCompraInvitado,
   finalizarCompraUsuario,

@@ -1,36 +1,23 @@
-import { Ofertas, Productos } from "../../models/index.js";
-import { Op } from "sequelize";
+import {getproductOfOferts} from '../../helpers/ofertasHelpers.js'
+import { NotFountError, ErrorServer} from '../../helpers/errorsInstances.js';
 
-// listar productos con ofertas
+
 export const listarOfertasConProductos = async (req, res) => {
   try {
-    const ofertas = await Productos.findAll({
-      where: {
-        discount: {
-          [Op.ne]: null,
-          [Op.gt]: 0,
-        },
-      },
-      attributes: [
-        "id",
-        "marca",
-        "nombre",
-        "valor",
-        "description",
-        "image",
-        "referencia",
-        "discount",
-      ],
-    });
-
-    if (!ofertas || ofertas.length === 0) {
-      return res.status(400).json({ message: "No hay productos en las ofertas" });
-    }
-
+    
+    const ofertas = await getproductOfOferts()
 
     return res.status(200).json({ productos: ofertas });
+
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: "Error al obtener las ofertas" });
+    if (error instanceof NotFountError) {
+      return res.status(error.statusCode).json({ message: error.message });
+    } else {
+      console.error(
+        "Error al obtener los productos con ofertas:",
+        error
+      );
+      return res.status(500).json({ error: new ErrorServer().message });
+    }
   }
 };

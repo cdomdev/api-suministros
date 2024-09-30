@@ -24,6 +24,14 @@ export class UserNotFountError extends Error {
 }
 
 
+export class NotFountError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = 'userNotFountError';
+        this.statusCode = 404
+    }
+}
+
 export class OrderNotFountError extends Error {
     constructor(message) {
         super(message);
