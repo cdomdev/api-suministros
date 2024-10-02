@@ -1,4 +1,4 @@
-import { findProducts, getProducts, getProductBy, getMoreSalledProducts } from "../../helpers/productosHelper.js";
+import { findProducts, getProducts, getProductBy, getMoreSalled } from "../../helpers/productosHelper.js";
 import { ErrorServer, NotFountError } from '../../helpers/errorsInstances.js'
 
 
@@ -17,11 +17,12 @@ export const listarProductos = async (req, res) => {
 
 
 
-export const buscarProductos = (req, res) => {
+export const buscarProductos = async (req, res) => {
   const { query } = req.body;
   try {
 
-    const resultados = findProducts(query)
+
+    const resultados = await findProducts(query)
 
     return res
       .status(200)
@@ -43,7 +44,7 @@ export const buscarProductos = (req, res) => {
 export const masVendidos = async (req, res) => {
   try {
 
-    const productos = await getMoreSalledProducts();
+    const productos = await getMoreSalled();
 
     return res.status(200).json({ productos: productos });
   } catch (error) {

@@ -1,23 +1,18 @@
 import { getCategoryBy, getSubCategoryBy } from "../../helpers/categoriasHelpers.js";
-import { NotFountError, ErrorServer, MissingDataError } from '../../helpers/errorsInstances.js'
+import { NotFountError, ErrorServer } from '../../helpers/errorsInstances.js'
 
 
 export const listarSubcategoria = async (req, res) => {
   const { codigo } = req.params;
-  
+
   try {
-    if(!codigo){
-      throw new MissingDataError('No hay codigo para la busqueda')
-    }
 
     const productos = await getSubCategoryBy(codigo)
 
     res.status(200).json({ productos });
 
   } catch (error) {
-    if(error instanceof MissingDataError){
-      return res.status(error.statusCode).json({ message: error.message });
-    }else if (error instanceof NotFountError) {
+    if (error instanceof NotFountError) {
       return res.status(error.statusCode).json({ message: error.message });
     } else {
       console.error(
@@ -31,20 +26,16 @@ export const listarSubcategoria = async (req, res) => {
 
 
 export const listarCategoria = async (req, res) => {
-  try {
-    const { codigo } = req.params;
-    if(!codigo){
-      throw new MissingDataError('No hay codigo para la busqueda')
-    }
+  const { codigo } = req.params;
 
-    const productos = getCategoryBy(codigo)
+  try {
+
+    const productos = await getCategoryBy(codigo)
 
     res.status(200).json({ productos });
 
   } catch (error) {
-    if(error instanceof MissingDataError){
-      return res.status(error.statusCode).json({ message: error.message });
-    }else if (error instanceof NotFountError) {
+    if (error instanceof NotFountError) {
       return res.status(error.statusCode).json({ message: error.message });
     } else {
       console.error(

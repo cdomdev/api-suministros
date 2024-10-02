@@ -22,6 +22,7 @@ export const registerAdmin = async (req, res) => {
         res.status(201).json({ message: 'success' });
 
     } catch (error) {
+        console.log('Error en el registro de un nuevo administrador', error)
         await t.rollback();
         if (error instanceof MissingDataError) {
             return res.status(error.statusCode).json({ message: error.message });
@@ -98,6 +99,7 @@ export const loginAdmin = async (req, res) => {
                 picture: user.picture
             });
     } catch (error) {
+        console.log('Error en el inicio de sesion como administrador', error)
         if (error instanceof MissingDataError) {
             return res.status(error.statusCode).json({ message: error.message });
         } else if (error instanceof UserNotFountError) {

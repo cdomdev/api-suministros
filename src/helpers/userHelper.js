@@ -1,10 +1,10 @@
-import { User, Roles } from "../models/index.js";
+import axios from 'axios'
 import bcrypt from "bcrypt";
 import { Op } from "sequelize";
-import { findUser } from "./findUser.js";
-import axios from 'axios'
+import { User, Roles } from "../models/index.js";
 import { sendMailsRegistro } from "../../templates/emailTemplatesJs/sendMailsRegistro.js";
 import { InvalidatedPasswordError, UserExisting, UserNotFountError } from './errorsInstances.js'
+
 
 export const findUser = async (email) => {
     try {
@@ -21,24 +21,25 @@ export const findUser = async (email) => {
     }
 }
 
-export const  getUserDataFromGoogle = async (token) => {
-  try {
-    const response = await axios.get(
-      "https://www.googleapis.com/oauth2/v1/userinfo",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    console.error(
-      "Error al obtener la información del usuario desde Google:",
-      error
-    );
-    throw error;
-  }
+
+export const getUserDataFromGoogle = async (token) => {
+    try {
+        const response = await axios.get(
+            "https://www.googleapis.com/oauth2/v1/userinfo",
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error(
+            "Error al obtener la información del usuario desde Google:",
+            error
+        );
+        throw error;
+    }
 }
 
 export const findOrCreateUserGoogle = async (datos) => {
@@ -166,7 +167,7 @@ export const updateDataProfile = async (user, email) => {
             });
 
             return userSessionData
-        }else{
+        } else {
             throw new UserNotFountError('No se pudo actualizar los datos del perfil')
         }
 

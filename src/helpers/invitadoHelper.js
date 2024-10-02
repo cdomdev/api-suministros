@@ -1,5 +1,4 @@
 import { Invitado } from "../models/invitado.js";
-import { findInvited } from "./findUser.js";
 
 export const findInvited = async (email) => {
     try {
@@ -7,25 +6,19 @@ export const findInvited = async (email) => {
             where: { email: email },
         })
     } catch (error) {
-        throw new Error('Error en la búsqueda del usuario' + error.message);
+        throw error;
     }
 }
 
 
-
 export const findOrCreateInvited = async (datos) => {
+
+    console.log('datos para el invitado ---> ', datos)
+
     try {
         let userDb = await findInvited(datos.email);
-        if (userDb) {
-            await Invitado.update({
-                ciudad: datos.city,
-                departamento: datos.region
-            }, {
-                where: { email: datos.email },
-            })
-            return userDb;
-        } else {
-            const NewInvited = await Invitado.create({
+        if (!userDb) {
+            await Invitado.create({
                 nombre: datos.nombre,
                 apellidos: datos.apellido,
                 direccion: datos.direccion,
@@ -35,9 +28,25 @@ export const findOrCreateInvited = async (datos) => {
                 ciudad: datos.city,
                 departamento: datos.region
             },);
-            return NewInvited;
+
+            let invited = await findInvited(datos.email)
+            console.log('usuario incitado', invited)
+            return invited;
+        } else {
+            await Invitado.update({
+                ciudad: datos.city,
+                departamento: datos.region
+            }, {
+                where: { email: datos.email },
+            })
+
+            let invited = await findInvited(datos.email)
+            console.log('usuario incitado', invited)
+            return invited;
         }
+
+
     } catch (error) {
-        throw new Error('Error en la creación o búsqueda del usuario: ' + error.message);
+        throw error
     }
 };

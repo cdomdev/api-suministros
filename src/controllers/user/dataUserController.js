@@ -19,6 +19,7 @@ export const obtenerDatosUsuario = async (req, res) => {
     res.status(200).json({ nombre, picture });
 
   } catch (error) {
+    console.log('Error al obtener los datos del usuario', error)
     if (error instanceof MissingDataError) {
       return res.status(error.statusCode).json({ message: error.message });
     } else if (error instanceof UserNotFountError) {
@@ -54,6 +55,7 @@ export const actulizarDatosDeUsuario = async (req, res) => {
       });
 
   } catch (error) {
+    console.log('Error al intentar actulizar los datos del usuario', error)
     if (error instanceof MissingDataError) {
       return res.status(error.statusCode).json({ message: error.message });
     } else if (error instanceof OrderNotFountError) {

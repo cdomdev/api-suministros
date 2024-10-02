@@ -1,4 +1,4 @@
-import { Productos } from "../models/index.js";
+import { Productos, Subcategorias } from "../models/index.js";
 import { NotFountError } from "./errorsInstances.js";
 import Sequelize from "sequelize";
 
@@ -15,6 +15,12 @@ export const getProducts = async () => {
                 "referencia",
                 "discount",
             ],
+            include: [
+                {
+                    model: Subcategorias,
+                    attributes: ["id", "nombre"],
+                },
+            ],
         });
 
         return productos
@@ -26,7 +32,7 @@ export const getProducts = async () => {
 export const findProducts = async (query) => {
     try {
 
-        Productos.findAll({
+        let productos = await Productos.findAll({
             where: {
                 nombre: Sequelize.where(
                     Sequelize.fn("LOWER", Sequelize.col("nombre")),
@@ -35,23 +41,22 @@ export const findProducts = async (query) => {
                 ),
             },
         })
-            .then((resultados) => {
-                if (resultados && resultados.length > 0) {
-                    return resultados
-                } else {
-                    throw new NotFountError("No se encontraron productos para la búsqueda proporcionada")
-                }
-            })
-            .catch((err) => {
-                throw err
-            });
+
+
+        if (!productos && productos.length === 0) {
+            throw new NotFountError("No se encontraron productos para la búsqueda proporcionada")
+        }
+
+
+        return productos
+
     } catch (error) {
         throw error
     }
 }
 
 
-export const getMoreSalledProducts = async () => {
+export const getMoreSalled = async () => {
     try {
 
 
@@ -93,35 +98,3 @@ export const getProductBy = async (id) => {
         throw error
     }
 }
-
-
-// export const buscarProductos = (req, res) => {
-//     const { query } = req.body;
-  
-//     Productos.findAll({
-//       where: {
-//         nombre: Sequelize.where(
-//           Sequelize.fn("LOWER", Sequelize.col("nombre")),
-//           "LIKE",
-//           `%${query.toLowerCase()}%`
-//         ),
-//       },
-//     })
-//       .then((resultados) => {
-//         if (resultados && resultados.length > 0) {
-//           return res
-//             .status(200)
-//             .json({ message: "Productos encontrados", resultados: resultados });
-//         } else {
-//           return res.status(404).json({
-//             message: "No se encontraron productos para la búsqueda proporcionada",
-//           });
-//         }
-//       })
-//       .catch((err) => {
-//         return res.status(500).json({
-//           message: "Error en el servidor al buscar productos",
-//           error: err,
-//         });
-//       });
-//   };

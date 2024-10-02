@@ -1,9 +1,9 @@
 import { sendMailsCompraMercadoPago } from "../../../templates/emailTemplatesJs/index.js";
-import { createItemsMercadoPago } from "../../utils/createItemsMercadoPago.js";
+import { createItemsMercadoPago } from "../../helpers/mercadoPagoHelper.js";
 import { findUser } from "../../helpers/userHelper.js";
-import { createOrderMercadopagoUser } from "../../helpers/createOrder.js";
+import { createOrderMercadopagoUser } from "../../helpers/ordersHelpers.js";
 import { createMercadoPagoPreferenceUser } from "../../helpers/mercadoPagoHelper.js";
-import {ErrorServer, MissingDataError, OrderNotFountError} from '../../helpers/errorsInstances.js'
+import { ErrorServer, MissingDataError, OrderNotFountError } from '../../helpers/errorsInstances.js'
 
 
 export const createPreferenceUser = async (req, res) => {
@@ -22,7 +22,7 @@ export const createPreferenceUser = async (req, res) => {
     const mercadoPagoItems = createItemsMercadoPago(productos, valorDeEnvio);
 
     const preferenceMercadopago = await createMercadoPagoPreferenceUser(mercadoPagoItems, nuevoPedido.id);
-   
+
     await t.commit();
 
     setTimeout(() => {
@@ -37,13 +37,13 @@ export const createPreferenceUser = async (req, res) => {
 
   } catch (error) {
     await t.rollback();
-    if(error instanceof MissingDataError){
+    if (error instanceof MissingDataError) {
       return res.status(error.statusCode).json({ message: error.message });
-    }else if(error instanceof OrderNotFountError){
+    } else if (error instanceof OrderNotFountError) {
       return res.status(error.statusCode).json({ message: error.message });
-    }else{
+    } else {
       console.error("Error en el controlador de finalizar compra invitado:", error);
-      return res.status(500).json({ error: new ErrorServer().message});
+      return res.status(500).json({ error: new ErrorServer().message });
     }
   }
 };
