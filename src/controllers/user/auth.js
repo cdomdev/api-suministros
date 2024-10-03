@@ -10,7 +10,7 @@ import {
 import {
   generateAccessToken,
   generateRefreshToken,
-} from "../../helpers/createTokensSesion.js";
+} from "../../utils/createTokensSesion.js";
 import { createNewUser, findOrCreateUserGoogle, resetDataPassword, validatedUser, findUser, getUserDataFromGoogle } from "../../helpers/userHelper.js";
 import { ErrorServer, InvalidatedPasswordError, MissingDataError, UserExisting, UserNotFountError } from "../../helpers/errorsInstances.js";
 

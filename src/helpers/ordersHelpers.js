@@ -122,7 +122,7 @@ export const createDetailsOrders = async (
 
     await DetallesPedido.bulkCreate(detalles, { transaction });
 
-    updateMasVendidos(productos)
+    await updateMasVendidos(productos)
 
   } catch (error) {
     console.log("Error al crear un pedido", error.message);

@@ -1,10 +1,11 @@
 import axios from 'axios'
 import bcrypt from "bcrypt";
 import { Op } from "sequelize";
+import jwt from 'jsonwebtoken'
 import { User, Roles } from "../models/index.js";
 import { sendMailsRegistro } from "../../templates/emailTemplatesJs/sendMailsRegistro.js";
-import { InvalidatedPasswordError, UserExisting, UserNotFountError } from './errorsInstances.js'
-
+import { InvalidatedDataUser, InvalidatedPasswordError, UserExisting, UserNotFountError,  } from './errorsInstances.js'
+import { generateAccessToken } from '../utils/createTokensSesion.js';
 
 export const findUser = async (email) => {
     try {
@@ -197,4 +198,38 @@ export const updateDataUser = async (datos) => {
     } catch (error) {
         throw error
     }
+}
+
+export const refreshTokenUser = async (refreshToken, secretRefresToken) => {
+
+    try {
+
+        let user = await User.findOne({
+            where: { refreshToken: refreshToken },
+            include: [
+                {
+                    model: Roles,
+                    as: "roles",
+                },
+            ],
+        });
+
+        if (!user) {
+            throw new UserNotFountError("El usuario no existe");
+        }
+
+        const decoded = jwt.verify(refreshToken, secretRefresToken);
+
+        if (!decoded) {
+            throw new InvalidatedDataUser("Refresh token no válido");
+        }
+
+        const newAccessToken = generateAccessToken(user);
+
+        return newAccessToken
+
+    } catch (error) {
+        throw error
+    }
+
 }

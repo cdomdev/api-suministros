@@ -1,85 +1,68 @@
-import { Categorias } from "../../models/index.js";
-import { generarCodigoDesdeNombre } from "../../utils/generateCodigo.js";
-
-// Controlador para  categorias y subcategorias
+import { MissingDataError, NotFountError, ErrorServer } from '../../helpers/errorsInstances.js'
+import { deleteCategoryBy, getAllCategories, newCategory } from "../../helpers/adminHelpers/categoriasHelpers.js";
 
 export const crearCategorias = async (req, res) => {
   const { nombre } = req.body;
-  // if (req.user.role !== "admin") {
-  //   return res
-  //     .status(403)
-  //     .json({ success: false, message: "Acceso no autorizado" });
-  // }
+  if (!nombre) throw new MissingDataError('El nombre de la categoria es requerido')
   try {
-    if (nombre) {
-      // genera codigo para categoria
-      const codigo = generarCodigoDesdeNombre(nombre);
-      // crear nueva categoria en la db
-      const nuevaCategoria = await Categorias.create({
-        nombre,
-        codigo,
-      });
-      if (nuevaCategoria) {
-        // procede la busqueda de toda las cotegorias
-        const categorias = await Categorias.findAll({
-          attributes: ["id", "nombre"],
-        });
-        res.status(201).json({
-          mensaje: "Categoria creada exitosamente",
-          categorias: categorias,
-        });
-      }
-    }
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      mensaje: "Hubo un problema al crear la categoria",
-      error: error,
+    const categorias = await newCategory(nombre)
+
+    res.status(201).json({
+      mensaje: "Categoria creada exitosamente",
+      categorias: categorias,
     });
+
+  } catch (error) {
+    console.log('Hubo un error al crear la nueva categoria', error);
+    if (error instanceof MissingDataError) {
+      return res.status(error.statusCode).json({ mensaje: error.message })
+    } else if (error instanceof NotFountError) {
+      return res.status(error.statusCode).json({ mensaje: error.message })
+    } else {
+      return res.status(500).json({ error: new ErrorServer().message });
+    }
+
   }
 };
 
 export const listarCategorias = async (req, res) => {
   try {
-    const categorias = await Categorias.findAll({
-      attributes: ["id", "nombre"],
-    });
+
+    const categorias = await getAllCategories()
+
     res.status(200).json({ categorias });
+
   } catch (e) {
-    console.log(e);
-    res.status(500).json({ error: "Error al obtener las categorias" });
+    console.log('Error al listar las categorias', e);
+    if (error instanceof NotFountError) {
+      return res.status(error.statusCode).json({ mensaje: error.message })
+    } else {
+      return res.status(500).json({ error: new ErrorServer().message });
+    }
   }
 };
 
 export const eliminarCategoria = async (req, res) => {
   const { id } = req.params;
 
-  // if (req.user.role !== "admin") {
-  //   return res
-  //     .status(403)
-  //     .json({ success: false, message: "Acceso no autorizado" });
-  // }
-  try {
-    const categoria = await Categorias.destroy({
-      where: { id: id },
-    });
+  if (!id) throw new MissingDataError('El id de la categoria es requerido')
 
-    if (categoria) {
-      const categorias = await Categorias.findAll({
-        attributes: ["id", "nombre"],
-      });
-      return res
-        .status(200)
-        .json({ message: "Categoría eliminada exitosamente", categorias });
-    } else {
-      return res
-        .status(404)
-        .json({ message: "No se encontró la categoría a eliminar" });
-    }
-  } catch (error) {
-    console.error(error);
+  try {
+
+    const categorias = await deleteCategoryBy(id)
     return res
-      .status(500)
-      .json({ error: "Error al intentar eliminar la categoría" });
+      .status(200)
+      .json({ message: "Categoría eliminada exitosamente", categorias });
+
+
+  } catch (error) {
+    console.error('Error al intentar eliminar la categoría', error);
+    if (error instanceof MissingDataError) {
+      return res.status(error.statusCode).json({ mensaje: error.message })
+    }else if (error instanceof NotFountError) {
+      return res.status(error.statusCode).json({ mensaje: error.message })
+    } else {
+      return res.status(500).json({ error: new ErrorServer().message });
+    }
   }
 };

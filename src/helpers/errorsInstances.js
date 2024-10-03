@@ -14,6 +14,15 @@ export class InvalidatedPasswordError extends Error {
     }
 }
 
+export class InvalidatedDataUser extends Error {
+    constructor(message) {
+        super(message);
+        this.name = 'invalidatedPasswordError';
+        this.statusCode = 403
+    }
+}
+
+
 
 export class UserNotFountError extends Error {
     constructor(message) {

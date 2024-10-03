@@ -1,36 +1,20 @@
-import jwt from "jsonwebtoken";
-import { generateAccessToken } from "../../helpers/createTokensSesion.js";
-import { Roles, User } from "../../models/index.js";
+import { refreshTokenUser } from "../../helpers/userHelper.js";
+import { ErrorServer, InvalidatedDataUser, UserNotFountError} from "../../helpers/errorsInstances.js";
 
 const secretRefresToken = process.env.CLAVE_FOR_TOKEN_REFRESH;
+
 
 export const refreshToken = async (req, res) => {
   const refreshToken = req.cookies.refresh_token;
 
-  if (!refreshToken) return res.sendStatus(401);
+  if (!refreshToken) {
+    throw new InvalidatedDataUser('No se proporcionó un refresh token')
+  };
 
   try {
-    const user = await User.findOne({
-      where: { refreshToken: refreshToken },
-      include: [
-        {
-          model: Roles,
-          as: "roles",
-        },
-      ],
-    });
 
-    if (!user || user.refreshToken !== refreshToken) {
-      return res.status(403).json({ message: "Refresh token no válido" });
-    }
-
-    const decoded = jwt.verify(refreshToken, secretRefresToken);
-    if (!decoded) {
-      return res.status(403).json({ message: "Refresh token no válido" });
-    }
-
-    const newAccessToken = generateAccessToken(user);
-
+   const newAccessToken = await refreshTokenUser(refreshToken,secretRefresToken)
+   
     res
       .status(200)
       .cookie("access_token", newAccessToken, {
@@ -39,9 +23,17 @@ export const refreshToken = async (req, res) => {
         sameSite: "lax",
         maxAge: 1000 * 60 * 60,
       })
-      .json({ success: true, accessToken: newAccessToken });
+      .json({ success: true });
+
+
   } catch (error) {
     console.error("Error al renovar el access token:", error);
-    res.status(500).json({ success: false, message: "Error en el servidor" });
+    if(error instanceof UserNotFountError){
+      res.status(error.statusCode).json({ success: false, message: error.message });
+    }else if(error instanceof InvalidatedDataUser){
+      res.status(error.statusCode).json({ success: false, message: error.message });
+    }else{
+      return res.status(500).json({ error: new ErrorServer().message });
+    }
   }
 };

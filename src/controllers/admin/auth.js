@@ -1,5 +1,5 @@
 import { validatedUser } from "../../helpers/userHelper.js";
-import { generateAccessToken, generateRefreshToken, } from "../../helpers/createTokensSesion.js";
+import { generateAccessToken, generateRefreshToken, } from "../../utils/createTokensSesion.js";
 import { MissingDataError, InvalidatedPasswordError, ErrorServer, UserNotFountError, UserExisting } from "../../helpers/errorsInstances.js";
 import { conecction } from "../../../database/conecction.js";
 import { createNewAdmin } from "../../helpers/adminHelper.js";

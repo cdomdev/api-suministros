@@ -1,256 +1,108 @@
-import {
-  Productos,
-  Inventario,
-  Subcategorias,
-  Categorias,
-} from "../../models/index.js";
+import { deleteProductBy, getAllProductoForInventary, updateInventaryBy, updateProductInventaryBy } from "../../helpers/adminHelpers/inventarioHelpers.js";
+import { ErrorServer, NotFountError, MissingDataError } from '../../helpers/errorsInstances.js'
 
-// Controlador para listar productos invenatario
 
 export const listarProductos = async (req, res) => {
   try {
-    const productos = await Productos.findAll({
-      attributes: [
-        "id",
-        "nombre",
-        "marca",
-        "valor",
-        "description",
-        "image",
-        "referencia",
-      ],
-      include: [
-        {
-          model: Inventario,
-          attributes: ["cantidad"],
-        },
-        {
-          model: Categorias,
-          attributes: ["id", "nombre"],
-        },
-        {
-          model: Subcategorias,
-          attributes: ["id", "nombre"],
-        },
-      ],
-    });
+
+    const productos = await getAllProductoForInventary()
+
     res.status(200).json({ productos });
   } catch (e) {
-    console.log(e);
-    res.status(500).json({ error: "Error al obtener los productos" });
+    console.log('Error al obtener los productos de inventario', e);
+    if (error instanceof NotFountError) {
+      return res.status(error.statusCode).json({ mensaje: error.message })
+    } else {
+      return res.status(500).json({ error: new ErrorServer().message });
+    }
   }
 };
 
-// Controlador para actulizar inventario
+
 export const actulizarStock = async (req, res) => {
   const { newStock } = req.body;
   const { id: producto_Id } = req.params;
-  console.log(req.user);
-  if (req.user.role !== "admin") {
-    return res
-      .status(403)
-      .json({ success: false, message: "Acceso no autorizado" });
-  }
-
   try {
-    const inventario = await Inventario.findOne({ where: { producto_Id } });
-    if (inventario) {
-      // actualizar la cantidad en el inventario
-      await Inventario.update(
-        { cantidad: newStock },
-        { where: { producto_Id: producto_Id } }
-      );
-      const inventaryUpdate = await Productos.findAll({
-        attributes: [
-          "id",
-          "nombre",
-          "marca",
-          "valor",
-          "description",
-          "image",
-          "referencia",
-          "categoria_id",
-          "subcategoria_id",
-        ],
-        include: [
-          {
-            model: Inventario,
-            attributes: ["cantidad"],
-          },
-          {
-            model: Categorias,
-            attributes: ["id", "nombre"],
-          },
-          {
-            model: Subcategorias,
-            attributes: ["id", "nombre"],
-          },
-        ],
-      });
 
-      return res.status(200).json({
-        message: "OK",
-        inventaryUpdate,
-      });
-    } else {
-      return res.status(404).json({
-        message: "No se encontró el registro de inventario para el producto.",
-      });
+    if (!newStock || !producto_Id) {
+      throw new MissingDataError('Faltan datos para el proceso de actualizacion')
     }
-  } catch (error) {
-    console.log(error);
-    console.error("Error al actualizar la cantidad en el inventario:", error);
-    return res.status(500).json({
-      error: "Hubo un error al actualizar la cantidad en el inventario.",
+
+
+    const inventaryUpdate = await updateInventaryBy(id, newStock)
+
+    res.status(200).json({
+      message: "OK",
+      inventaryUpdate,
     });
+
+
+  } catch (error) {
+    console.log("Error al actualizar la cantidad en el inventario:", error);
+    if (error instanceof MissingDataError) {
+      return res.status(error.statusCode).json({ mensaje: error.message })
+    } else if (error instanceof NotFountError) {
+      return res.status(error.statusCode).json({ mensaje: error.message })
+    } else {
+      return res.status(500).json({ error: new ErrorServer().message });
+    }
   }
 };
 
-// Actulizar los productos en inventario
+
 export const actualizarProducto = async (req, res) => {
   const { newProduct } = req.body;
   const { id: producto_Id } = req.params;
-
-  const {
-    nombre,
-    marca,
-    valor,
-    description,
-    referencia,
-    categoria_id,
-    subcategoria_id,
-  } = newProduct;
-
-  if (req.user.role !== "admin") {
-    return res
-      .status(403)
-      .json({ success: false, message: "Acceso no autorizado" });
-  }
   try {
-    const productos = await Productos.findOne({ where: { id: producto_Id } });
-    if (productos) {
-      await Productos.update(
-        {
-          nombre,
-          marca,
-          valor,
-          description,
-          referencia,
-          categoria_id,
-          subcategoria_id,
-        },
-        { where: { id: producto_Id } }
-      );
-      const productosUpdate = await Productos.findAll({
-        attributes: [
-          "id",
-          "nombre",
-          "marca",
-          "valor",
-          "description",
-          "image",
-          "referencia",
-          "categoria_id",
-          "subcategoria_id",
-        ],
-        include: [
-          {
-            model: Inventario,
-            attributes: ["cantidad"],
-          },
-          {
-            model: Categorias,
-            attributes: ["id", "nombre"],
-          },
-          {
-            model: Subcategorias,
-            attributes: ["id", "nombre"],
-          },
-        ],
-      });
-      return res.status(200).json({
-        message: "Producto atualizado exitosamente.",
-        productosUpdate,
-      });
-    } else {
-      return res.status(404).json({
-        message: "No se encontró el registro producto.",
-      });
+
+    if (!newProduct || !producto_Id) {
+      throw new MissingDataError('Faltan datos para el proceso de actualizacion')
     }
-  } catch (error) {
-    console.log(error);
-    console.log("Error interno del servidor", error);
-    return res.status(500).json({
-      error: "Hubo un error al actualizar la cantidad en el inventario.",
+
+    const productosUpdate = await updateProductInventaryBy(producto_Id, newProduct)
+
+    res.status(200).json({
+      message: "OK",
+      productosUpdate,
     });
+
+  } catch (error) {
+    console.log('Hubo un error al actualizar la cantidad en el inventario.', error);
+    if (error instanceof MissingDataError) {
+      return res.status(error.statusCode).json({ mensaje: error.message })
+    } else if (error instanceof NotFountError) {
+      return res.status(error.statusCode).json({ mensaje: error.message })
+    } else {
+      return res.status(500).json({ error: new ErrorServer().message });
+    }
   }
 };
 
-// Eliminar productos de inventario
+
 export const eliminarProductos = async (req, res) => {
   const { id: producto_Id } = req.params;
 
-  if (req.user.role !== "admin") {
-    return res
-      .status(403)
-      .json({ success: false, message: "Acceso no autorizado" });
-  }
-
   try {
-    // Eliminar el producto por su ID
-    const productoEliminado = await Productos.destroy({
-      where: { id: producto_Id },
-    });
 
-    if (!productoEliminado) {
-      return res
-        .status(404)
-        .json({ message: "No se pudo encontrar el producto" });
+    if (!producto_Id) {
+      throw new MissingDataError('El id del producto es requerido')
     }
 
-    // Eliminar la cantidad en inventario relacionada al producto
-    const inventarioEliminado = await Inventario.destroy({
-      where: { producto_Id: producto_Id },
-    });
+    const daleteUpdate = await deleteProductBy(producto_Id)
 
-    const daleteUpdate = await Productos.findAll({
-      attributes: [
-        "id",
-        "nombre",
-        "marca",
-        "valor",
-        "description",
-        "image",
-        "referencia",
-        "categoria_id",
-        "subcategoria_id",
-      ],
-      include: [
-        {
-          model: Inventario,
-          attributes: ["cantidad"],
-        },
-        {
-          model: Categorias,
-          attributes: ["id", "nombre"],
-        },
-        {
-          model: Subcategorias,
-          attributes: ["id", "nombre"],
-        },
-      ],
-    });
-
-    // Si ambos borrados fueron exitosos
-    return res.status(200).json({
+    res.status(200).json({
       message: "Producto y cantidad en inventario eliminados con éxito",
       daleteUpdate,
     });
+
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      error:
-        "Hubo un error al intentar eliminar el producto y su cantidad en inventario.",
-    });
+    console.log('Hubo un error al intentar eliminar el producto y su cantidad en inventario', error);
+    if (error instanceof MissingDataError) {
+      return res.status(error.statusCode).json({ mensaje: error.message })
+    } else if (error instanceof NotFountError) {
+      return res.status(error.statusCode).json({ mensaje: error.message })
+    } else {
+      return res.status(500).json({ error: new ErrorServer().message });
+    }
   }
 };

@@ -47,11 +47,6 @@ export const tickRead = async (req, res) => {
 
 export const deleteNotifications = async (req, res) => {
   const { id } = req.params;
-  // if (req.user.role !== "admin") {
-  //   return res
-  //     .status(403)
-  //     .json({ success: false, message: "Acceso no autorizado" });
-  // }
 
   try {
     const deletedCount = await Notifcaciones.destroy({
