@@ -1,10 +1,17 @@
 import { generarCodigoDesdeNombre } from "../../utils/generateCodigo.js"
-import { NotFountError } from "../errorsInstances.js"
+import { MissingDataError, NotFountError } from "../errorsInstances.js"
 import { Categorias } from "../../models/index.js"
 
 export const newCategory = async (nombre) => {
     try {
+
+        if (!nombre) {
+            throw new MissingDataError('El nombre de la categoria es requerido')
+        }
+
+
         const codigo = generarCodigoDesdeNombre(nombre)
+
 
         if (!codigo) {
             throw new NotFountError('Hubo un error al general el codido para la categoria')
@@ -58,6 +65,7 @@ export const getCategories = async () => {
 
 export const deleteCategoryBy = async (id) => {
     try {
+        if (!id) throw new MissingDataError('El id de la categoria es requerido')
 
         const categoria = await Categorias.destroy({
             where: { id: id },

@@ -5,7 +5,7 @@ import { calculosDeBalances } from "../../utils/calculosEnBalances.js";
 export const balances = async (req, res) => {
   try {
 
-    const [totalUsers, totalOrders, detalles] = await Promise.all([
+    const [totalUsers, detalles] = await Promise.all([
       getListOfusers(),
       getAllorders(),
     ]);
@@ -14,7 +14,7 @@ export const balances = async (req, res) => {
 
     res.status(200).json({
       users: totalUsers,
-      totalOrders,
+      totalOrders: detalles.length,
       totalSales: totalVendido,
       totalPending: totalPending.length,
       totalShipped: totalShipped.length,
@@ -34,7 +34,7 @@ export const balances = async (req, res) => {
 export const mostSalledsProducts = async (req, res) => {
   try {
 
-    const products = salledsProducts()
+    const products = await salledsProducts()
 
     return res.status(200).json({ success: true, data: products });
   } catch (error) {

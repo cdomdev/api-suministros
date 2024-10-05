@@ -13,13 +13,16 @@ export const authenticateToken = (req, res, next) => {
     });
   }
 
+
   jwt.verify(token, claveSecreta, (err, decoded) => {
     if (err) {
       return res
         .status(403)
         .json({ success: false, message: "Token inválido" });
     }
+
     req.user = decoded;
+
     next();
   });
 };

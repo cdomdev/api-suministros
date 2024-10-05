@@ -140,7 +140,8 @@ export const updateMasVendidos = async (productos) => {
       );
     }
   } catch (error) {
-    throw new Error('Error al actulzar datos de mas vendidos', error.message)
+    console.log('Error al actulzar datos de mas vendidos', error.message)
+    throw error
   }
 
 
@@ -172,7 +173,7 @@ export const updateDataPedido = async (status_detail, id, pedidoId) => {
       "Error al actualizar los datos en detalles del pedido:",
       error
     );
-    return null;
+    throw error
   }
 };
 

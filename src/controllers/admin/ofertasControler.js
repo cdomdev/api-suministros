@@ -1,6 +1,5 @@
-import { Productos, Ofertas } from "../../models/index.js";
 import { ErrorServer, NotFountError, MissingDataError } from "../../helpers/errorsInstances.js";
-import { deleteOfertasBy, getAllOfertas, getProductsForOferta, updateOfertaBy } from "../../helpers/adminHelpers/ofertasHelpers.js";
+import { deleteOfertasBy, getAllOfertas, getProductsForOferta, newOferta, updateOfertaBy } from "../../helpers/adminHelpers/ofertasHelpers.js";
 
 
 export const crearOfetas = async (req, res) => {
@@ -9,7 +8,7 @@ export const crearOfetas = async (req, res) => {
 
   try {
 
-    const nuevasOfertas = crearOfetas(nombre, descuento, productos, fechaIni, fechaFin)
+    const nuevasOfertas = await newOferta(nombre, descuento, productos, fechaIni, fechaFin)
 
     return res
       .status(201)
@@ -31,6 +30,7 @@ export const crearOfetas = async (req, res) => {
 
 export const obtenerProductos = async (req, res) => {
   try {
+
     const productos = await getProductsForOferta()
 
     res
@@ -70,18 +70,20 @@ export const obtenerOfertasConProductos = async (req, res) => {
 export const eliminarOferta = async (req, res) => {
   const { id } = req.params;
 
-
   try {
 
-    const ofertas = deleteOfertasBy(id)
+    const ofertas = await deleteOfertasBy(id)
 
     return res.status(200).json({
       message: "OK",
       ofertas,
     });
+
   } catch (error) {
     console.log('Error al eliminar la oferta', error);
-    if (error instanceof NotFountError) {
+    if (error instanceof MissingDataError) {
+      return res.status(error.statusCode).json({ mensaje: error.message })
+    } else if (error instanceof NotFountError) {
       return res.status(error.statusCode).json({ mensaje: error.message })
     } else {
       return res.status(500).json({ error: new ErrorServer().message });
@@ -105,7 +107,9 @@ export const actulizarOfertas = async (req, res) => {
 
   } catch (error) {
     console.log('Hubo un error al intentar actualizar la oferta', error);
-    if (error instanceof NotFountError) {
+    if (error instanceof MissingDataError) {
+      return res.status(error.statusCode).json({ mensaje: error.message })
+    } else if (error instanceof NotFountError) {
       return res.status(error.statusCode).json({ mensaje: error.message })
     } else {
       return res.status(500).json({ error: new ErrorServer().message });

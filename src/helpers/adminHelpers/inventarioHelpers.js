@@ -1,5 +1,5 @@
 import { Productos, Categorias, Subcategorias, Inventario } from "../../models/index.js"
-import { NotFountError } from '../errorsInstances.js'
+import { NotFountError, MissingDataError } from '../errorsInstances.js'
 
 
 export const getAllProductoForInventary = async () => {
@@ -44,6 +44,10 @@ export const getAllProductoForInventary = async () => {
 export const updateInventaryBy = async (id, nuevaCantidad) => {
     try {
 
+        if (!id || !nuevaCantidad) {
+            throw new MissingDataError('Faltan datos para el proceso de actualizacion')
+        }
+
         const inventario = await Inventario.findOne({ where: { id } });
 
         if (inventario) {
@@ -53,7 +57,7 @@ export const updateInventaryBy = async (id, nuevaCantidad) => {
             );
         }
 
-        if (inventario ===  0) {
+        if (inventario === 0) {
             throw new NotFountError('Hubo un error al actulizar datos del inventario')
         }
 
@@ -69,6 +73,7 @@ export const updateInventaryBy = async (id, nuevaCantidad) => {
 
 export const getOneProductBy = async (id) => {
     try {
+
         const productos = await Productos.findOne({ where: { id: id } });
 
         if (!productos) {
@@ -94,6 +99,10 @@ export const updateProductInventaryBy = async (id, nuevosDatos) => {
 
 
     try {
+
+        if (!id || !nuevosDatos) {
+            throw new MissingDataError('Faltan datos para el proceso de actualizacion')
+        }
 
         const producto = await getOneProductBy(id)
 
@@ -126,6 +135,10 @@ export const updateProductInventaryBy = async (id, nuevosDatos) => {
 
 export const deleteProductBy = async (id) => {
     try {
+
+        if (!id) {
+            throw new MissingDataError('El id del producto es requerido')
+        }
 
         const productoEliminado = await Productos.destroy({
             where: { id: id },

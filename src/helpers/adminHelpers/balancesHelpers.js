@@ -37,13 +37,10 @@ export const getAllorders = async () => {
             throw new NotFountError('Error al listar los pedidos en balances')
         }
 
-        const totalOrders = ordersWithDetails.length;
         const detalles = ordersWithDetails;
 
-        return {
-            totalOrders,
-            detalles,
-        };
+        return detalles
+
 
     } catch (error) {
         throw error;
@@ -53,10 +50,12 @@ export const getAllorders = async () => {
 
 export const salledsProducts = async () => {
     try {
+
         const products = await Productos.findAll({
             order: [["sales_count", "DESC"]],
             limit: 5,
         });
+
         if (!products) {
             throw new NotFountError('Error al listar los productos mas vendidos')
         }

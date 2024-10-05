@@ -22,14 +22,10 @@ export const listarProductos = async (req, res) => {
 export const actulizarStock = async (req, res) => {
   const { newStock } = req.body;
   const { id: producto_Id } = req.params;
+
   try {
 
-    if (!newStock || !producto_Id) {
-      throw new MissingDataError('Faltan datos para el proceso de actualizacion')
-    }
-
-
-    const inventaryUpdate = await updateInventaryBy(id, newStock)
+    const inventaryUpdate = await updateInventaryBy(producto_Id, newStock)
 
     res.status(200).json({
       message: "OK",
@@ -53,11 +49,8 @@ export const actulizarStock = async (req, res) => {
 export const actualizarProducto = async (req, res) => {
   const { newProduct } = req.body;
   const { id: producto_Id } = req.params;
-  try {
 
-    if (!newProduct || !producto_Id) {
-      throw new MissingDataError('Faltan datos para el proceso de actualizacion')
-    }
+  try {
 
     const productosUpdate = await updateProductInventaryBy(producto_Id, newProduct)
 
@@ -83,10 +76,6 @@ export const eliminarProductos = async (req, res) => {
   const { id: producto_Id } = req.params;
 
   try {
-
-    if (!producto_Id) {
-      throw new MissingDataError('El id del producto es requerido')
-    }
 
     const daleteUpdate = await deleteProductBy(producto_Id)
 

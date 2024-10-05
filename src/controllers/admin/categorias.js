@@ -3,8 +3,8 @@ import { deleteCategoryBy, getAllCategories, newCategory } from "../../helpers/a
 
 export const crearCategorias = async (req, res) => {
   const { nombre } = req.body;
-  if (!nombre) throw new MissingDataError('El nombre de la categoria es requerido')
   try {
+
     const categorias = await newCategory(nombre)
 
     res.status(201).json({
@@ -45,8 +45,6 @@ export const listarCategorias = async (req, res) => {
 export const eliminarCategoria = async (req, res) => {
   const { id } = req.params;
 
-  if (!id) throw new MissingDataError('El id de la categoria es requerido')
-
   try {
 
     const categorias = await deleteCategoryBy(id)
@@ -59,7 +57,7 @@ export const eliminarCategoria = async (req, res) => {
     console.error('Error al intentar eliminar la categoría', error);
     if (error instanceof MissingDataError) {
       return res.status(error.statusCode).json({ mensaje: error.message })
-    }else if (error instanceof NotFountError) {
+    } else if (error instanceof NotFountError) {
       return res.status(error.statusCode).json({ mensaje: error.message })
     } else {
       return res.status(500).json({ error: new ErrorServer().message });

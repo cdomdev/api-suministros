@@ -1,7 +1,6 @@
 import express from "express";
 import { imageUpload } from "../utils/imageUpload.js";
-import { saveImagenServer } from "../controllers/admin/saveImageServer.js";
-import { guardarProducto } from "../controllers/admin/saveProducts.js";
+import { guardarProducto, saveImagenServer } from "../controllers/admin/saveProducts.js";
 import { authenticateToken } from "../middleware/authenticateToken.js";
 import { loginAdmin, logout, registerAdmin } from '../controllers/admin/auth.js'
 import {
@@ -44,6 +43,7 @@ import {
 } from "../controllers/admin/balances.js";
 import {
   deleteNotifications,
+  markAllAsRead,
   notificationList,
   tickRead,
 } from "../controllers/admin/notificationsAdmin.js";
@@ -111,7 +111,9 @@ routerAdmin.delete(
 
 routerAdmin.get("/productos", obtenerProductos);
 
-routerAdmin.post("/crear/ofertas", authenticateToken, crearOfetas);
+routerAdmin.post("/crear/ofertas",
+  authenticateToken,
+  crearOfetas);
 
 routerAdmin.get(
   "/listar/ofertas",
@@ -158,3 +160,5 @@ routerAdmin.delete(
 );
 
 routerAdmin.post("/tick-read/:id", authenticateToken, tickRead);
+routerAdmin.put("/tick-readAll", authenticateToken, markAllAsRead);
+

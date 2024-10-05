@@ -18,18 +18,17 @@ export const getAllOfertas = async () => {
     }
 }
 
-export const createOferta = async (nombre, descuento, productos, fechaIni, fechaFin) => {
-
-    if (!nombre || !descuento || !productos || !fechaIni || !fechaFin) {
-        throw new MissingDataError('Faltan datos para crear la oferta')
-    }
-
+export const newOferta = async (nombre, descuento, productos, fechaIni, fechaFin) => {
     const fechaInicio = moment(fechaIni, "DD-MM-YYYY").format("YYYY-MM-DD");
     const fechaFinal = moment(fechaFin, "DD-MM-YYYY").format("YYYY-MM-DD");
 
     try {
 
-        await updateDescuento()
+        if (!nombre || !descuento || !productos || !fechaIni || !fechaFin) {
+            throw new MissingDataError('Faltan datos para crear la oferta')
+        }
+
+        await updateDescuento(productos, descuento)
 
         const nuevaOferta = await Ofertas.create({
             nombre,
@@ -51,7 +50,7 @@ export const createOferta = async (nombre, descuento, productos, fechaIni, fecha
 }
 
 
-export const updateDescuento = async (productos) => {
+export const updateDescuento = async (productos, descuento) => {
     try {
         if (productos && productos.length > 0) {
             for (const id of productos) {
@@ -62,6 +61,7 @@ export const updateDescuento = async (productos) => {
         }
 
     } catch (error) {
+        console.log('Hubo un error en la actualizacion del descuento en los productos' + error.message)
         throw error
     }
 }
@@ -89,12 +89,16 @@ export const getProductsForOferta = async () => {
 export const deleteOfertasBy = async (id) => {
     try {
 
+        if (!id) {
+            throw new MissingDataError('Se require de un id para eliminar un producto')
+        }
+
         const ofertaAElminar = await Ofertas.findByPk(id);
 
         if (!ofertaAElminar) {
             throw new NotFountError('Oferta no encontrada')
-
         }
+
         await ofertaAElminar.removeProductos(id);
         await ofertaAElminar.destroy();
 
@@ -106,13 +110,18 @@ export const deleteOfertasBy = async (id) => {
     }
 }
 
-export const updateOfertaBy = async (id, updatedValues) => {    
+export const updateOfertaBy = async (id, updatedValues) => {
     const { nombre, descuento, fechaIni, fechaFin } = updatedValues;
 
     const fecha_inicio = fechaIni;
     const fecha_fin = fechaFin;
 
     try {
+
+        if (!updatedValues || !id) {
+            throw new MissingDataError('Faltan datos para actulizar la oferta')
+        }
+
         const ofertaUpdate = await Ofertas.findOne({ where: { id } });
 
         if (!ofertaUpdate) {
