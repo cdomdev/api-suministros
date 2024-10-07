@@ -3,7 +3,6 @@ import bcrypt from 'bcrypt'
 
 export const createNewAdmin = async (nombre, email, password, transaction) => {
     const hashedPassword = await bcrypt.hash(password, 10);
-    try {
 
         let user = await User.findOne({
             where: { email: email },
@@ -21,7 +20,4 @@ export const createNewAdmin = async (nombre, email, password, transaction) => {
         }, { transaction });
 
         return newUser
-    } catch (error) {
-        throw error
-    }
 }

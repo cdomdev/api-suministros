@@ -64,14 +64,10 @@ export const handlePaymentNotification = async (body, res) => {
         return res.status(200).send("Webhook received and processed");
       } else {
         console.error("Error actualizando detalles del pedido.");
-        return res.status(500).send("Error actualizando detalles del pedido");
+        throw new NotFountError('Error al intentar actulizar los datos del pedido')
       }
     } else {
       console.log("Datos no procesados");
-      return res.status(500).send("Error processing payment data");
-    }
-  } catch (error) {
-    console.error("Error en la solicitud del pago:", error);
-    return res.status(500).send("Error en la solicitud del pago");
-  }
+      throw new NotFountError('Error al procesosar los datos del pago')
+
 };

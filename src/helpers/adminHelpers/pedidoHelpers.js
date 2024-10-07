@@ -2,7 +2,6 @@ import { User, Invitado, Roles, DetallesPedido, Pedido, Productos } from "../../
 import { NotFountError, MissingDataError } from '../errorsInstances.js'
 
 export const getAllUsers = async () => {
-    try {
         const users = User.findAll({
             attributes:
                 [
@@ -28,10 +27,9 @@ export const getAllUsers = async () => {
         }
 
         return users
-    } catch (error) {
-        throw error
-    }
 }
+
+
 // funcion reutilizable en los helpers de getAllUserWhithOrder y getAllInvitedsWithOrders 
 // para el lisatdo de pedidos mas indicador
 
@@ -54,7 +52,6 @@ const listUsersWithOrders = async (users, conditionKey) => {
 };
 
 export const getAllInvited = async () => {
-    try {
         const invitados = await Invitado.findAll({
             attributes:
                 [
@@ -74,14 +71,9 @@ export const getAllInvited = async () => {
         }
 
         return invitados
-    } catch (error) {
-        throw error
-    }
 }
 
 export const getAllUserWithOrders = async () => {
-    try {
-
         const usuarios = await getAllUsers()
 
         const usuariosConPedidos = await listUsersWithOrders(
@@ -90,13 +82,10 @@ export const getAllUserWithOrders = async () => {
         );
 
         return usuariosConPedidos;
-    } catch (error) {
-        throw error
-    }
+
 }
 
 export const getAllInvitedsWithOrders = async () => {
-    try {
 
         const invitados = await getAllInvited()
 
@@ -111,29 +100,22 @@ export const getAllInvitedsWithOrders = async () => {
         }));
 
         return invitadosConPedidosMasRole;
-    } catch (error) {
-        throw error
-    }
+
 }
 
 export const getAllPedidos = async () => {
-    try {
-
         const usuariosConPedidos = await getAllUserWithOrders();
         const invitadosConPedidos = await getAllInvitedsWithOrders();
 
         const listaPedidos = [...usuariosConPedidos, ...invitadosConPedidos];
 
         return listaPedidos
-    } catch (error) {
-        throw error
-    }
+    
 
 }
 
 
 export const getOrderUserBy = async (id) => {
-    try {
 
         if (!id) {
             throw new MissingDataError('Se require el id del usuario para listar los pedidos')
@@ -170,15 +152,10 @@ export const getOrderUserBy = async (id) => {
 
         return pedidos
 
-    } catch (error) {
-        throw error
-    }
 }
 
 
 export const updateStateBy = async (id, estado) => {
-    try {
-
         if (!estado || !id) {
             throw new MissingDataError('Faltan datos para actulizar el estado del pedido')
         }
@@ -193,14 +170,10 @@ export const updateStateBy = async (id, estado) => {
             throw new NotFountError('Algo salio mal, no se pudo actulzar el estado del pedido')
         }
 
-    } catch (error) {
-        throw error
-    }
 }
 
 
 export const getOrderInvitedBy = async (id) => {
-    try {
 
         if (!id) {
             throw new MissingDataError('Se require el id del usuario para listar los pedidos')
@@ -236,7 +209,4 @@ export const getOrderInvitedBy = async (id) => {
         }
 
         return pedidos
-    } catch (error) {
-        throw error
-    }
 }

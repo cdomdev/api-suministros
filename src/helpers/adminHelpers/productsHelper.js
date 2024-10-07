@@ -2,7 +2,6 @@ import { MissingDataError, NotFountError } from "../errorsInstances.js"
 import { Productos, Inventario } from "../../models/index.js";
 
 export const saveProducto = async (listaProductos) => {
-    try {
 
         if (!listaProductos) {
             throw new MissingDataError('Faltan datos para crear un nuevo producto')
@@ -33,7 +32,4 @@ export const saveProducto = async (listaProductos) => {
 
         await Inventario.bulkCreate(inventario)
 
-    } catch (error) {
-        throw error
-    }
 }

@@ -3,7 +3,6 @@ import { NotFountError, MissingDataError } from '../errorsInstances.js'
 
 
 export const getAllProductoForInventary = async () => {
-    try {
         const productos = await Productos.findAll({
             attributes: [
                 "id",
@@ -35,14 +34,9 @@ export const getAllProductoForInventary = async () => {
         }
 
         return productos
-
-    } catch (error) {
-        throw error
-    }
 }
 
 export const updateInventaryBy = async (id, nuevaCantidad) => {
-    try {
 
         if (!id || !nuevaCantidad) {
             throw new MissingDataError('Faltan datos para el proceso de actualizacion')
@@ -66,13 +60,9 @@ export const updateInventaryBy = async (id, nuevaCantidad) => {
 
         return productos
 
-    } catch (error) {
-        throw error
-    }
 }
 
 export const getOneProductBy = async (id) => {
-    try {
 
         const productos = await Productos.findOne({ where: { id: id } });
 
@@ -81,9 +71,7 @@ export const getOneProductBy = async (id) => {
         }
 
         return productos
-    } catch (error) {
-        throw error
-    }
+
 }
 
 export const updateProductInventaryBy = async (id, nuevosDatos) => {
@@ -97,8 +85,6 @@ export const updateProductInventaryBy = async (id, nuevosDatos) => {
         subcategoria_id,
     } = nuevosDatos;
 
-
-    try {
 
         if (!id || !nuevosDatos) {
             throw new MissingDataError('Faltan datos para el proceso de actualizacion')
@@ -128,13 +114,10 @@ export const updateProductInventaryBy = async (id, nuevosDatos) => {
 
         return productos
 
-    } catch (error) {
-        throw error
-    }
+    
 }
 
 export const deleteProductBy = async (id) => {
-    try {
 
         if (!id) {
             throw new MissingDataError('El id del producto es requerido')
@@ -156,7 +139,4 @@ export const deleteProductBy = async (id) => {
 
         return productos
 
-    } catch (error) {
-        throw error
-    }
 }

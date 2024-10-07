@@ -3,8 +3,6 @@ import { MissingDataError, NotFountError } from "../errorsInstances.js"
 import { Categorias } from "../../models/index.js"
 
 export const newCategory = async (nombre) => {
-    try {
-
         if (!nombre) {
             throw new MissingDataError('El nombre de la categoria es requerido')
         }
@@ -28,15 +26,9 @@ export const newCategory = async (nombre) => {
         const categorias = await getAllCategories()
 
         return categorias
-
-
-    } catch (error) {
-        throw error
-    }
 }
 
 export const getAllCategories = async () => {
-    try {
 
         const categorias = await Categorias.findAll(
             { attributes: ["id", "nombre"], });
@@ -47,24 +39,14 @@ export const getAllCategories = async () => {
 
         return categorias
 
-    } catch (error) {
-        throw error
-    }
 }
 
 export const getCategories = async () => {
-    try {
         const categorias = await getAllCategories()
-
         return categorias
-
-    } catch (error) {
-        throw error
-    }
 }
 
 export const deleteCategoryBy = async (id) => {
-    try {
         if (!id) throw new MissingDataError('El id de la categoria es requerido')
 
         const categoria = await Categorias.destroy({
@@ -79,7 +61,4 @@ export const deleteCategoryBy = async (id) => {
 
         return categorias
 
-    } catch (error) {
-        throw error
-    }
 }

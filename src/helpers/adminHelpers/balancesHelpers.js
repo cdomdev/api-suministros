@@ -2,7 +2,6 @@ import { User, Roles, Invitado, Pedido, DetallesPedido, Productos, } from "../..
 import { NotFountError } from "../errorsInstances.js";
 
 export const getListOfusers = async () => {
-    try {
 
         const users = await getAllUsers()
 
@@ -16,14 +15,10 @@ export const getListOfusers = async () => {
 
         return combinedList.length;
 
-    } catch (error) {
-        throw error
-    }
 };
 
 
 export const getAllorders = async () => {
-    try {
         const ordersWithDetails = await Pedido.findAll({
             include: [
                 {
@@ -41,15 +36,10 @@ export const getAllorders = async () => {
 
         return detalles
 
-
-    } catch (error) {
-        throw error;
-    }
 };
 
 
 export const salledsProducts = async () => {
-    try {
 
         const products = await Productos.findAll({
             order: [["sales_count", "DESC"]],
@@ -61,16 +51,11 @@ export const salledsProducts = async () => {
         }
 
         return products
-    } catch (error) {
-        throw error
-    }
-
+    
 };
 
 
 export const sales = async () => {
-    try {
-
         const users = await getAllUsers();
         const invited = await getAllInviteds();
 
@@ -85,14 +70,10 @@ export const sales = async () => {
 
         return ventas
 
-    } catch (error) {
-        throw error
-    }
 };
 
 
 const getAllUsers = async () => {
-    try {
         const usuarios = await User.findAll({
             attributes: ["id", "nombre", "email", "picture"],
             include: [
@@ -107,14 +88,10 @@ const getAllUsers = async () => {
         }
 
         return usuarios || [];
-    } catch (e) {
-        throw e
-    }
 };
 
 
 const getAllInviteds = async () => {
-    try {
         const invitados = await Invitado.findAll({
             attributes: ["id", "nombre", "email"],
         });
@@ -123,9 +100,6 @@ const getAllInviteds = async () => {
         }
 
         return invitados || [];
-    } catch (e) {
-        throw e
-    }
 };
 
 

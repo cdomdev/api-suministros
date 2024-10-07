@@ -3,7 +3,6 @@ import { Productos, Ofertas, Inventario } from '../../models/index.js';
 import { NotFountError, MissingDataError } from '../errorsInstances.js';
 
 export const getAllOfertas = async () => {
-    try {
         const ofertas = await Ofertas.findAll({
             include: {
                 model: Productos,
@@ -13,16 +12,11 @@ export const getAllOfertas = async () => {
         });
 
         return ofertas
-    } catch (error) {
-        throw error
-    }
 }
 
 export const newOferta = async (nombre, descuento, productos, fechaIni, fechaFin) => {
     const fechaInicio = moment(fechaIni, "DD-MM-YYYY").format("YYYY-MM-DD");
     const fechaFinal = moment(fechaFin, "DD-MM-YYYY").format("YYYY-MM-DD");
-
-    try {
 
         if (!nombre || !descuento || !productos || !fechaIni || !fechaFin) {
             throw new MissingDataError('Faltan datos para crear la oferta')
@@ -44,14 +38,11 @@ export const newOferta = async (nombre, descuento, productos, fechaIni, fechaFin
 
         return ofertas
 
-    } catch (error) {
-        throw error
-    }
 }
 
 
 export const updateDescuento = async (productos, descuento) => {
-    try {
+
         if (productos && productos.length > 0) {
             for (const id of productos) {
                 await Productos.update({ discount: descuento }, { where: { id: id } });
@@ -60,14 +51,9 @@ export const updateDescuento = async (productos, descuento) => {
             throw new NotFountError('Hubo un error en la actualizacion del descuento en los productos')
         }
 
-    } catch (error) {
-        console.log('Hubo un error en la actualizacion del descuento en los productos' + error.message)
-        throw error
-    }
 }
 
 export const getProductsForOferta = async () => {
-    try {
 
         const productos = await Productos.findAll({
             attributes: ["id", "marca", "nombre"],
@@ -81,13 +67,9 @@ export const getProductsForOferta = async () => {
 
         return productos
 
-    } catch (error) {
-        throw error
-    }
 }
 
 export const deleteOfertasBy = async (id) => {
-    try {
 
         if (!id) {
             throw new MissingDataError('Se require de un id para eliminar un producto')
@@ -105,9 +87,6 @@ export const deleteOfertasBy = async (id) => {
         const ofertas = await getAllOfertas()
 
         return ofertas
-    } catch (error) {
-        throw error
-    }
 }
 
 export const updateOfertaBy = async (id, updatedValues) => {
@@ -115,8 +94,6 @@ export const updateOfertaBy = async (id, updatedValues) => {
 
     const fecha_inicio = fechaIni;
     const fecha_fin = fechaFin;
-
-    try {
 
         if (!updatedValues || !id) {
             throw new MissingDataError('Faltan datos para actulizar la oferta')
@@ -137,7 +114,4 @@ export const updateOfertaBy = async (id, updatedValues) => {
 
         return ofertas
 
-    } catch (error) {
-        throw error
-    }
 }
