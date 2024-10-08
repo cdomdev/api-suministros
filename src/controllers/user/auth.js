@@ -1,39 +1,23 @@
-import axios from "axios";
-import crypto from "crypto";
-import { promisify } from "util";
 import { conecction } from "../../../database/conecction.js";
-import {
-  sendMailsRegistro,
-  sendMailsRecover,
-  sendMailForgotSucess,
-} from "../../../templates/emailTemplatesJs/index.js";
 import {
   generateAccessToken,
   generateRefreshToken,
 } from "../../utils/createTokensSesion.js";
-import { createNewUser, findOrCreateUserGoogle, resetDataPassword, validatedUser, findUser, getUserDataFromGoogle } from "../../helpers/userHelper.js";
-import { ErrorServer, InvalidatedPasswordError, MissingDataError, UserExisting, UserNotFountError } from "../../helpers/errorsInstances.js";
+import { createNewUser, findOrCreateUserGoogle, resetDataPassword, validatedUser, getUserDataFromGoogle, createRequestResetPassword } from "../../helpers/userHelpers/authHelper.js";
+import { ErrorServer, MissingDataError, NotFountError, UnauthorizedError, UserExisting } from "../../helpers/errorsInstances.js";
 
-const randomBytesAsync = promisify(crypto.randomBytes);
 
 export const googleLogin = async (req, res) => {
   const { token } = req.body;
-  const CLIENT_ID = process.env.CLIENT_ID;
 
   try {
-    const googleResponse = await axios.get(
-      `https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${token}`
-    );
-
-    if (googleResponse.data.audience !== CLIENT_ID) {
-      return res.status(401).json({ error: 'Token de acceso no válido' });
-    }
 
     const userData = await getUserDataFromGoogle(token);
 
     const nuevoUser = await findOrCreateUserGoogle(userData)
 
     const accessToken = generateAccessToken(nuevoUser);
+
     const refreshToken = generateRefreshToken(nuevoUser);
 
     const userSessionData = JSON.stringify({
@@ -81,6 +65,11 @@ export const googleLogin = async (req, res) => {
       });
   } catch (error) {
     console.error('Error en el proceso de inicio de sesión con Google:', error);
+    if (error instanceof UnauthorizedError) {
+      return res.status(error.statusCode).json({ message: error.message })
+    } else if (error instanceof NotFountError) {
+      return res.status(error.statusCode).json({ message: error.message })
+    }
     return res.status(500).json({ error: new ErrorServer().message });
   }
 };
@@ -91,42 +80,33 @@ export const registroController = async (req, res) => {
 
   try {
 
-    if (!nombre || !email || !password) {
-      throw new MissingDataError('Faltan datos para proceder con el registro')
-    }
-
     await createNewUser(nombre, email, password, t);
 
     await t.commit();
-
-    sendMailsRegistro(nombre, email);
 
     res.status(201).json({ message: 'success' });
 
   } catch (error) {
     await t.rollback();
+    console.log('Error en el proceso de resgitro de un nuevo usuario', error)
     if (error instanceof MissingDataError) {
       return res.status(error.statusCode).json({ message: error.message });
     } else if (error instanceof UserExisting) {
       return res.status(error.statusCode).json({ message: 'Ya existe un usuario con esa informacion' });
-    } else {
-      console.error("Error en el registro de un nuevo usuario:", error);
-      return res.status(500).json({ error: new ErrorServer().message });
     }
+    return res.status(500).json({ error: new ErrorServer().message });
   }
 };
 
 export const loginController = async (req, res) => {
   const { email, password } = req.body
 
-  if (!email || !password) {
-    throw new MissingDataError('Faltan datos para proceder con en inicio de sesion')
-  }
-
   try {
+
     const user = await validatedUser(email, password)
 
     const accessToken = generateAccessToken(user);
+
     const refreshToken = generateRefreshToken(user);
 
     user.refreshToken = refreshToken;
@@ -172,58 +152,40 @@ export const loginController = async (req, res) => {
         picture: user.picture
       });
   } catch (error) {
+    console.log('Hubo un error en la autenticacion del usuario', error)
     if (error instanceof MissingDataError) {
       return res.status(error.statusCode).json({ message: error.message });
-    } else if (error instanceof UserNotFountError) {
-      return res.status(error.statusCode).json({ message: error.message });
-    } else if (error instanceof InvalidatedPasswordError) {
-      return res.status(error.statusCode).json({ message: error.message });
-    } else {
-      console.error("Error en el controlador de inicio de sesión:", error);
-      return res.status(500).json({ error: new ErrorServer().message });
+    } else if (error instanceof UnauthorizedError) {
+      return res.status(error.statusCode).json({ message: error.message })
+    } else if (error instanceof NotFountError) {
+      return res.status(error.statusCode).json({ message: error.message })
     }
+    return res.status(500).json({ error: new ErrorServer().message });
   }
 };
+
 
 export const validateEmail = async (req, res) => {
   const { email } = req.body;
 
-  if (!email) {
-    throw new MissingDataError('Faltan datos para procesar la solicitud')
-  }
   try {
 
-    let user = await findUser(email);
-
-    const buffer = await randomBytesAsync(32);
-    const token = buffer.toString("hex");
-    const tokenExpires = Date.now() + 3600000;
-
-    user.resetPasswordToken = token;
-    user.resetPasswordExpires = tokenExpires;
-    await user.save();
-
-    const resetUrl = `http://localhost:4321/restablecer-contrasenia/${token}`;
-
-    const { nombre } = user;
-
-    sendMailsRecover(nombre, email, resetUrl);
+    const user = await createRequestResetPassword(email)
 
     return res.status(200).json({
       message: 'success',
       email,
-      nombre,
+      user,
     });
 
   } catch (error) {
+    console.log("Error al intentar restablcer la contraseña:", error);
     if (error instanceof MissingDataError) {
       return res.status(error.statusCode).json({ message: error.message });
-    } else if (error instanceof UserNotFountError) {
+    } else if (error instanceof NotFountError) {
       return res.status(error.statusCode).json({ message: error.message });
-    } else {
-      console.error("Error al intentar restablcer la contraseña:", error);
-      return res.status(500).json({ error: new ErrorServer().message });
     }
+    return res.status(500).json({ error: new ErrorServer().message });
   }
 };
 
@@ -231,26 +193,22 @@ export const validateEmail = async (req, res) => {
 export const resetPassword = async (req, res) => {
   const { password } = req.body;
   const { token } = req.params
-
-  if (!token) {
-    throw new MissingDataError("Token no proporcionado");
-  }
   try {
 
-    let user = resetDataPassword(password, token)
-    sendMailForgotSucess(user.name, user.email);
+    await resetDataPassword(password, token)
+
     res
       .status(200)
       .json({ message: "Contraseña restablecida con éxito" });
+
   } catch (error) {
+    console.log("Error en el controlador de inicio de sesión:", error);
     if (error instanceof MissingDataError) {
       return res.status(error.statusCode).json({ message: error.message });
-    } else if (error instanceof UserNotFountError) {
+    } else if (error instanceof NotFountError) {
       return res.status(error.statusCode).json({ message: error.message });
-    } else {
-      console.error("Error en el controlador de inicio de sesión:", error);
-      return res.status(500).json({ error: new ErrorServer().message });
     }
+    return res.status(500).json({ error: new ErrorServer().message });
   }
 };
 

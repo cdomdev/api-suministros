@@ -6,29 +6,20 @@ export class MissingDataError extends Error {
     }
 }
 
-export class InvalidatedPasswordError extends Error {
+export class UnauthorizedError extends Error {
     constructor(message) {
         super(message);
-        this.name = 'invalidatedPasswordError';
+        this.name = 'UnauthorizedError';
         this.statusCode = 401
     }
 }
 
-export class InvalidatedDataUser extends Error {
+
+export class ForbiddenError extends Error {
     constructor(message) {
         super(message);
-        this.name = 'invalidatedPasswordError';
+        this.name = 'ForbiddenError';
         this.statusCode = 403
-    }
-}
-
-
-
-export class UserNotFountError extends Error {
-    constructor(message) {
-        super(message);
-        this.name = 'userNotFountError';
-        this.statusCode = 404
     }
 }
 
@@ -36,21 +27,14 @@ export class UserNotFountError extends Error {
 export class NotFountError extends Error {
     constructor(message) {
         super(message);
-        this.name = 'userNotFountError';
+        this.name = 'NotFountError';
         this.statusCode = 404
     }
 }
 
-export class OrderNotFountError extends Error {
+
+export class UserExisting extends Error {
     constructor(message) {
-        super(message);
-        this.name = 'userNotFountError';
-        this.statusCode = 404
-    }
-}
-
-export class UserExisting extends Error{
-    constructor(message){
         super(message);
         this.name = 'userExisting'
         this.statusCode = 409
@@ -59,8 +43,8 @@ export class UserExisting extends Error{
 
 
 
-export class ErrorServer extends Error{
-    constructor(message = "Error en el servidor. Por favor intente de nuevo más tarde."){
+export class ErrorServer extends Error {
+    constructor(message = "Error en el servidor. Por favor intente de nuevo más tarde.") {
         super(message);
         this.name = 'errorServer'
         this.statusCode = 500

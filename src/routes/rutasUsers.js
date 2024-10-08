@@ -5,7 +5,7 @@ import {
   listarProductos,
   masVendidos,
 } from "../controllers/user/productsController.js";
-import {listarCategoria, listarSubcategoria} from '../controllers/user/categoriasController.js'
+import { listarCategoria, listarSubcategoria } from '../controllers/user/categoriasController.js'
 import {
   finalizarCompraInvitado,
   finalizarCompraUsuario,
@@ -25,7 +25,7 @@ import {
   logout,
 } from "../controllers/user/auth.js";
 import { refreshToken } from "../controllers/user/refreshToken.js";
-import { feedBack, reciveWebhook } from "../controllers/user/webhooks.js";
+import { reciveWebhook } from "../controllers/user/webhooks.js";
 
 import { createPreferenceUser } from "../controllers/user/createPreferenceUser.js";
 import { createPreferenceInvited } from "../controllers/user/createPreferenceInvited.js";
@@ -89,6 +89,6 @@ routerUser.post("/webhooks-invited", reciveWebhook);
 
 routerUser.post("/webhooks-user", reciveWebhook);
 
-routerUser.get("/feedBack", feedBack);
+// routerUser.get("/feedBack", feedBack);
 
 routerUser.get("/user/pedidos/:id", listarPedidoPorUsuario);

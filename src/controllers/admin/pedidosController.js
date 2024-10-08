@@ -14,9 +14,8 @@ export const listarPedidos = async (req, res) => {
     console.log("Error al obtener usuarios con pedidos", error);
     if (error instanceof NotFountError) {
       return res.status(error.statusCode).json({ mensaje: error.message })
-    } else {
-      return res.status(500).json({ error: new ErrorServer().message });
     }
+    return res.status(500).json({ error: new ErrorServer().message });
   }
 };
 
@@ -34,9 +33,8 @@ export const listarPedidoPorUsuario = async (req, res) => {
       return res.status(error.statusCode).json({ mensaje: error.message })
     } else if (error instanceof NotFountError) {
       return res.status(error.statusCode).json({ mensaje: error.message })
-    } else {
-      return res.status(500).json({ error: new ErrorServer().message });
     }
+    return res.status(500).json({ error: new ErrorServer().message });
   }
 };
 
@@ -56,9 +54,8 @@ export const listarPedidoPorInvitado = async (req, res) => {
       return res.status(error.statusCode).json({ mensaje: error.message })
     } else if (error instanceof NotFountError) {
       return res.status(error.statusCode).json({ mensaje: error.message })
-    } else {
-      return res.status(500).json({ error: new ErrorServer().message });
     }
+    return res.status(500).json({ error: new ErrorServer().message });
   }
 };
 
@@ -78,8 +75,7 @@ export const updateStateOrders = async (req, res) => {
       return res.status(error.statusCode).json({ mensaje: error.message })
     } else if (error instanceof NotFountError) {
       return res.status(error.statusCode).json({ mensaje: error.message })
-    } else {
-      return res.status(500).json({ error: new ErrorServer().message });
     }
+    return res.status(500).json({ error: new ErrorServer().message });
   }
 };

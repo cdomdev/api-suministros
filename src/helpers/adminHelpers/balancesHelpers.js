@@ -3,103 +3,103 @@ import { NotFountError } from "../errorsInstances.js";
 
 export const getListOfusers = async () => {
 
-        const users = await getAllUsers()
+    const users = await getAllUsers()
 
-        const inviteds = await getAllInviteds();
+    const inviteds = await getAllInviteds();
 
-        const combinedList = [...users, ...inviteds];
+    const combinedList = [...users, ...inviteds];
 
-        if (!combinedList) {
-            throw new NotFountError('Error al listar usuarios e invitados')
-        }
+    if (!combinedList) {
+        throw new NotFountError('Error al listar usuarios e invitados')
+    }
 
-        return combinedList.length;
+    return combinedList.length;
 
 };
 
 
 export const getAllorders = async () => {
-        const ordersWithDetails = await Pedido.findAll({
-            include: [
-                {
-                    model: DetallesPedido,
-                    as: "detalles_pedido",
-                },
-            ],
-        });
+    const ordersWithDetails = await Pedido.findAll({
+        include: [
+            {
+                model: DetallesPedido,
+                as: "detalles_pedido",
+            },
+        ],
+    });
 
-        if (!ordersWithDetails) {
-            throw new NotFountError('Error al listar los pedidos en balances')
-        }
+    if (!ordersWithDetails) {
+        throw new NotFountError('Error al listar los pedidos en balances')
+    }
 
-        const detalles = ordersWithDetails;
+    const detalles = ordersWithDetails;
 
-        return detalles
+    return detalles
 
 };
 
 
 export const salledsProducts = async () => {
 
-        const products = await Productos.findAll({
-            order: [["sales_count", "DESC"]],
-            limit: 5,
-        });
+    const products = await Productos.findAll({
+        order: [["sales_count", "DESC"]],
+        limit: 5,
+    });
 
-        if (!products) {
-            throw new NotFountError('Error al listar los productos mas vendidos')
-        }
+    if (!products) {
+        throw new NotFountError('Error al listar los productos mas vendidos')
+    }
 
-        return products
-    
+    return products
+
 };
 
 
 export const sales = async () => {
-        const users = await getAllUsers();
-        const invited = await getAllInviteds();
+    const users = await getAllUsers();
+    const invited = await getAllInviteds();
 
-        const ventasUsuarios = await listUsersWithOrders(users, "usuario_id");
-        const ventasInvitados = await listUsersWithOrders(invited, "invitado_id");
+    const ventasUsuarios = await listUsersWithOrders(users, "usuario_id");
+    const ventasInvitados = await listUsersWithOrders(invited, "invitado_id");
 
-        if (!ventasInvitados || !ventasInvitados) {
-            throw new NotFountError('Error al listar las ventas por mes')
-        }
+    if (!ventasInvitados || !ventasInvitados) {
+        throw new NotFountError('Error al listar las ventas por mes')
+    }
 
-        const ventas = [...ventasUsuarios.flat(), ...ventasInvitados.flat()];
+    const ventas = [...ventasUsuarios.flat(), ...ventasInvitados.flat()];
 
-        return ventas
+    return ventas
 
 };
 
 
 const getAllUsers = async () => {
-        const usuarios = await User.findAll({
-            attributes: ["id", "nombre", "email", "picture"],
-            include: [
-                {
-                    model: Roles,
-                    as: "roles",
-                },
-            ],
-        });
-        if (!usuarios) {
-            throw new NotFountError('Error al listar los usuarios')
-        }
+    const usuarios = await User.findAll({
+        attributes: ["id", "nombre", "email", "picture"],
+        include: [
+            {
+                model: Roles,
+                as: "roles",
+            },
+        ],
+    });
+    if (!usuarios) {
+        throw new NotFountError('Error al listar los usuarios')
+    }
 
-        return usuarios || [];
+    return usuarios || [];
 };
 
 
 const getAllInviteds = async () => {
-        const invitados = await Invitado.findAll({
-            attributes: ["id", "nombre", "email"],
-        });
-        if (!invitados) {
-            throw new NotFountError('Error al listar los invitados')
-        }
+    const invitados = await Invitado.findAll({
+        attributes: ["id", "nombre", "email"],
+    });
+    if (!invitados) {
+        throw new NotFountError('Error al listar los invitados')
+    }
 
-        return invitados || [];
+    return invitados || [];
 };
 
 

@@ -13,9 +13,8 @@ export const notificationList = async (req, res) => {
     console.log("Error en el lisatdo de notificaciones", error);
     if (error instanceof NotFountError) {
       return res.status(error.statusCode).json({ mensaje: error.message })
-    } else {
-      return res.status(500).json({ error: new ErrorServer().message });
     }
+    return res.status(500).json({ error: new ErrorServer().message });
   }
 };
 
@@ -36,9 +35,8 @@ export const tickRead = async (req, res) => {
       return res.status(error.statusCode).json({ mensaje: error.message })
     } else if (error instanceof NotFountError) {
       return res.status(error.statusCode).json({ mensaje: error.message })
-    } else {
-      return res.status(500).json({ error: new ErrorServer().message });
     }
+    return res.status(500).json({ error: new ErrorServer().message });
   }
 };
 
@@ -58,9 +56,8 @@ export const deleteNotifications = async (req, res) => {
       return res.status(error.statusCode).json({ mensaje: error.message })
     } else if (error instanceof NotFountError) {
       return res.status(error.statusCode).json({ mensaje: error.message })
-    } else {
-      return res.status(500).json({ error: new ErrorServer().message });
     }
+    return res.status(500).json({ error: new ErrorServer().message });
   }
 };
 
@@ -74,8 +71,7 @@ export const markAllAsRead = async (req, res) => {
   } catch (error) {
     if (error instanceof NotFountError) {
       return res.status(error.statusCode).json({ mensaje: error.message })
-    } else {
-      return res.status(500).json({ error: new ErrorServer().message });
     }
+    return res.status(500).json({ error: new ErrorServer().message });
   }
 }

@@ -22,9 +22,8 @@ export const saveImagenServer = (req, res) => {
     console.error("Error al subir las imágenes:", error);
     if (error instanceof MissingDataError) {
       return res.status(error.statusCode).json({ mensaje: error.message })
-    } else {
-      return res.status(500).json({ error: new ErrorServer().message });
     }
+    return res.status(500).json({ error: new ErrorServer().message });
   }
 };
 
@@ -46,8 +45,7 @@ export const guardarProducto = async (req, res) => {
       return res.status(error.statusCode).json({ mensaje: error.message })
     } else if (error instanceof NotFountError) {
       return res.status(error.statusCode).json({ mensaje: error.message })
-    } else {
-      return res.status(500).json({ error: new ErrorServer().message });
     }
+    return res.status(500).json({ error: new ErrorServer().message });
   }
 };

@@ -1,6 +1,6 @@
-import { findUser, updateDataProfile } from '../../helpers/userHelper.js'
-import { MissingDataError, ErrorServer, OrderNotFountError, UserNotFountError } from "../../helpers/errorsInstances.js";
-
+import { updateDataProfile } from '../../helpers/userHelpers/authHelper.js'
+import { MissingDataError, ErrorServer, NotFountError } from "../../helpers/errorsInstances.js";
+import { findUser } from '../../helpers/userHelpers/findUser.js';
 
 
 export const obtenerDatosUsuario = async (req, res) => {
@@ -22,7 +22,7 @@ export const obtenerDatosUsuario = async (req, res) => {
     console.log('Error al obtener los datos del usuario', error)
     if (error instanceof MissingDataError) {
       return res.status(error.statusCode).json({ message: error.message });
-    } else if (error instanceof UserNotFountError) {
+    } else if (error instanceof NotFountError) {
       return res.status(error.statusCode).json({ message: error.message });
     } else {
       console.error("Error al obtener los datos del usuario", error);
@@ -58,7 +58,7 @@ export const actulizarDatosDeUsuario = async (req, res) => {
     console.log('Error al intentar actulizar los datos del usuario', error)
     if (error instanceof MissingDataError) {
       return res.status(error.statusCode).json({ message: error.message });
-    } else if (error instanceof OrderNotFountError) {
+    } else if (error instanceof NotFountError) {
       return res.status(error.statusCode).json({ message: error.message });
     } else {
       console.error("Error al actulizar los datos del usuario:", error);

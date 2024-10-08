@@ -18,9 +18,8 @@ export const crearSubcategorias = async (req, res) => {
       return res.status(error.statusCode).json({ mensaje: error.message })
     } else if (error instanceof NotFountError) {
       return res.status(error.statusCode).json({ mensaje: error.message })
-    } else {
-      return res.status(500).json({ error: new ErrorServer().message });
     }
+    return res.status(500).json({ error: new ErrorServer().message });
   }
 };
 
@@ -34,9 +33,8 @@ export const listarSubcategorias = async (req, res) => {
     console.log('"Error al obtener las subcategorias" ', e);
     if (error instanceof NotFountError) {
       return res.status(error.statusCode).json({ mensaje: error.message })
-    } else {
-      return res.status(500).json({ error: new ErrorServer().message });
     }
+    return res.status(500).json({ error: new ErrorServer().message });
   }
 };
 
@@ -58,8 +56,7 @@ export const eliminarSubcategoria = async (req, res) => {
       return res.status(error.statusCode).json({ mensaje: error.message })
     } else if (error instanceof NotFountError) {
       return res.status(error.statusCode).json({ mensaje: error.message })
-    } else {
-      return res.status(500).json({ error: new ErrorServer().message });
     }
+    return res.status(500).json({ error: new ErrorServer().message });
   }
 };

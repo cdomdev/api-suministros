@@ -3,33 +3,33 @@ import { Productos, Inventario } from "../../models/index.js";
 
 export const saveProducto = async (listaProductos) => {
 
-        if (!listaProductos) {
-            throw new MissingDataError('Faltan datos para crear un nuevo producto')
-        }
+    if (!listaProductos) {
+        throw new MissingDataError('Faltan datos para crear un nuevo producto')
+    }
 
-        const productos = listaProductos.map(producto => ({
-            id: producto.id,
-            marca: producto.marca,
-            nombre: producto.nombre,
-            valor: producto.valor,
-            description: producto.description,
-            referencia: producto.referencia,
-            categoria_id: parseInt(producto.categoria_id),
-            subcategoria_id: parseInt(producto.subcategoria_id),
-            image: producto.image,
-        }))
+    const productos = listaProductos.map(producto => ({
+        id: producto.id,
+        marca: producto.marca,
+        nombre: producto.nombre,
+        valor: producto.valor,
+        description: producto.description,
+        referencia: producto.referencia,
+        categoria_id: parseInt(producto.categoria_id),
+        subcategoria_id: parseInt(producto.subcategoria_id),
+        image: producto.image,
+    }))
 
-        const saveData = await Productos.bulkCreate(productos, { returning: true })
+    const saveData = await Productos.bulkCreate(productos, { returning: true })
 
-        if (!saveData) {
-            throw new NotFountError('Algo salio mal crear nuevos productos')
-        }
+    if (!saveData) {
+        throw new NotFountError('Algo salio mal crear nuevos productos')
+    }
 
-        const inventario = saveData.map((productosGuardados, index) => ({
-            producto_Id: productosGuardados.id,
-            cantidad: productosGuardados[index].cantidad,
-        }))
+    const inventario = saveData.map((productosGuardados, index) => ({
+        producto_Id: productosGuardados.id,
+        cantidad: productosGuardados[index].cantidad,
+    }))
 
-        await Inventario.bulkCreate(inventario)
+    await Inventario.bulkCreate(inventario)
 
 }

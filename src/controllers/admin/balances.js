@@ -24,9 +24,9 @@ export const balances = async (req, res) => {
     console.log('Error en el proceso de listado de los balance', error)
     if (error instanceof NotFountError) {
       return res.status(error.statusCode).json({ message: error.message });
-    } else {
-      return res.status(500).json({ error: new ErrorServer().message });
     }
+
+    return res.status(500).json({ error: new ErrorServer().message });
   }
 };
 
@@ -41,9 +41,8 @@ export const mostSalledsProducts = async (req, res) => {
     console.log("Error al obtener las lista de productos mas vendidos", error);
     if (error instanceof NotFountError) {
       return res.status(error.statusCode).json({ message: error.message });
-    } else {
-      return res.status(500).json({ error: new ErrorServer().message });
     }
+    return res.status(500).json({ error: new ErrorServer().message });
   }
 };
 
@@ -58,9 +57,8 @@ export const salesMonth = async (req, res) => {
     console.log("Error en el listado de ventas por mes:", error);
     if (error instanceof NotFountError) {
       return res.status(error.statusCode).json({ message: error.message });
-    } else {
-      return res.status(500).json({ error: new ErrorServer().message });
     }
+    return res.status(500).json({ error: new ErrorServer().message });
   }
 };
 

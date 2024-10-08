@@ -18,9 +18,8 @@ export const crearCategorias = async (req, res) => {
       return res.status(error.statusCode).json({ mensaje: error.message })
     } else if (error instanceof NotFountError) {
       return res.status(error.statusCode).json({ mensaje: error.message })
-    } else {
-      return res.status(500).json({ error: new ErrorServer().message });
     }
+    return res.status(500).json({ error: new ErrorServer().message });
 
   }
 };
@@ -36,9 +35,8 @@ export const listarCategorias = async (req, res) => {
     console.log('Error al listar las categorias', e);
     if (error instanceof NotFountError) {
       return res.status(error.statusCode).json({ mensaje: error.message })
-    } else {
-      return res.status(500).json({ error: new ErrorServer().message });
     }
+    return res.status(500).json({ error: new ErrorServer().message });
   }
 };
 
@@ -59,8 +57,7 @@ export const eliminarCategoria = async (req, res) => {
       return res.status(error.statusCode).json({ mensaje: error.message })
     } else if (error instanceof NotFountError) {
       return res.status(error.statusCode).json({ mensaje: error.message })
-    } else {
-      return res.status(500).json({ error: new ErrorServer().message });
     }
+    return res.status(500).json({ error: new ErrorServer().message });
   }
 };

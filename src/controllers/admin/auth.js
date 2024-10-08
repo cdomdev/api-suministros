@@ -1,8 +1,8 @@
-import { validatedUser } from "../../helpers/userHelper.js";
+import { validatedUser } from "../../helpers/userHelpers/authHelper.js";
 import { generateAccessToken, generateRefreshToken, } from "../../utils/createTokensSesion.js";
-import { MissingDataError, InvalidatedPasswordError, ErrorServer, UserNotFountError, UserExisting } from "../../helpers/errorsInstances.js";
+import { MissingDataError, ForbiddenError, ErrorServer, NotFountError } from "../../helpers/errorsInstances.js";
 import { conecction } from "../../../database/conecction.js";
-import { createNewAdmin } from "../../helpers/adminHelper.js";
+import { createNewAdmin } from "../../helpers/adminHelpers/authAdminHelper.js";
 
 
 export const registerAdmin = async (req, res) => {
@@ -10,11 +10,6 @@ export const registerAdmin = async (req, res) => {
     const t = await conecction.transaction();
 
     try {
-
-        if (!nombre || !email || !password) {
-            throw new MissingDataError('Faltan datos para proceder con el registro')
-        }
-
         await createNewAdmin(nombre, email, password, t);
 
         await t.commit();
@@ -38,11 +33,6 @@ export const registerAdmin = async (req, res) => {
 
 export const loginAdmin = async (req, res) => {
     const { email, password } = req.body
-
-    if (!email || !password) {
-        throw new MissingDataError('Faltan datos para proceder con el inicio de sesion')
-    }
-
     try {
 
         const user = await validatedUser(email, password)
@@ -102,9 +92,9 @@ export const loginAdmin = async (req, res) => {
         console.log('Error en el inicio de sesion como administrador', error)
         if (error instanceof MissingDataError) {
             return res.status(error.statusCode).json({ message: error.message });
-        } else if (error instanceof UserNotFountError) {
+        } else if (error instanceof NotFountError) {
             return res.status(error.statusCode).json({ message: error.message });
-        } else if (error instanceof InvalidatedPasswordError) {
+        } else if (error instanceof ForbiddenError) {
             return res.status(error.statusCode).json({ message: error.message });
         } else {
             console.error("Error en el controlador de inicio de sesión:", error);

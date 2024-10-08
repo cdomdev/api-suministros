@@ -1,9 +1,7 @@
-import { sendMailsCompraMercadoPago } from "../../../templates/emailTemplatesJs/index.js";
-import { createItemsMercadoPago } from "../../helpers/mercadoPagoHelper.js";
-import { findUser } from "../../helpers/userHelper.js";
-import { createOrderMercadopagoUser } from "../../helpers/ordersHelpers.js";
-import { createMercadoPagoPreferenceUser } from "../../helpers/mercadoPagoHelper.js";
-import { ErrorServer, MissingDataError, OrderNotFountError } from '../../helpers/errorsInstances.js'
+import { findUser } from "../../helpers/userHelpers/findUser.js";
+import { createOrderMercadopagoUser } from "../../helpers/userHelpers/ordersHelpers.js";
+import { createMercadoPagoPreferenceUser, createItemsMercadoPago } from "../../helpers/userHelpers/mercadoPagoHelper.js";
+import { ErrorServer, MissingDataError, NotFountError } from '../../helpers/errorsInstances.js'
 
 
 export const createPreferenceUser = async (req, res) => {
@@ -11,9 +9,6 @@ export const createPreferenceUser = async (req, res) => {
   const t = await conecction.transaction();
 
   try {
-    if (!productos || !datos || !valorDeEnvio) {
-      throw new MissingDataError("Faltan datos para procesar el pago");
-    }
 
     const user = await findUser(datos);
 
@@ -21,13 +16,10 @@ export const createPreferenceUser = async (req, res) => {
 
     const mercadoPagoItems = createItemsMercadoPago(productos, valorDeEnvio);
 
-    const preferenceMercadopago = await createMercadoPagoPreferenceUser(mercadoPagoItems, nuevoPedido.id);
+    const preferenceMercadopago = await createMercadoPagoPreferenceUser(mercadoPagoItems, nuevoPedido.id, user, productos, valorDeEnvio);
 
     await t.commit();
 
-    setTimeout(() => {
-      sendMailsCompraMercadoPago(0, user, productos, valorDeEnvio);
-    }, 1 * 60 * 1000);
 
     res.status(200).json({
       id: preferenceMercadopago.id,
@@ -39,7 +31,7 @@ export const createPreferenceUser = async (req, res) => {
     await t.rollback();
     if (error instanceof MissingDataError) {
       return res.status(error.statusCode).json({ message: error.message });
-    } else if (error instanceof OrderNotFountError) {
+    } else if (error instanceof NotFountError) {
       return res.status(error.statusCode).json({ message: error.message });
     } else {
       console.error("Error en el controlador de finalizar compra invitado:", error);
