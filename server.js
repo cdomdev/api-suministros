@@ -6,6 +6,19 @@ import cookieParser from "cookie-parser";
 import { routerUser } from "./src/routes/rutasUsers.js";
 import { routerAdmin } from "./src/routes/rutasAdmin.js";
 import { conecction } from "./database/conecction.js";
+import {
+  Roles, Categorias,
+  DetallesPedido,
+  Inventario,
+  Invitado,
+  Notifacaciones,
+  Ofertas,
+  OfertasProductos,
+  Pedido,
+  Productos,
+  Subcategorias,
+  User
+} from "./src/models/index.js";
 
 const app = express();
 const port = process.env.PORT || 3100;
@@ -54,8 +67,20 @@ app.use((err, req, res, next) => {
 
 async function starServer() {
   try {
+    await conecction.sync({ alter: true });
     await conecction.sync()
-
+    await Roles.sync();
+    await User.sync();
+    await Categorias.sync();
+    await Subcategorias.sync();
+    await Productos.sync();
+    await Ofertas.sync();
+    await OfertasProductos.sync();
+    await Inventario.sync();
+    await Pedido.sync();
+    await DetallesPedido.sync();
+    await Invitado.sync();
+    await Notifacaciones.sync();
     app.listen(port, () => {
       console.log(`El servidor se está ejecutando en el puerto ${port}`);
     });

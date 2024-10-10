@@ -11,7 +11,6 @@ import { Pedido } from "./pedido.js";
 import { Roles } from "./roles.js";
 import { Subcategorias } from "./subcategorias.js";
 import { User } from "./user.js";
-
 //------ Relaciones entre modelos ------
 
 // Relación pedido - detalles pedido
