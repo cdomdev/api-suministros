@@ -1,4 +1,4 @@
-import { Notifacaciones } from "../../models/notificaciones.js";
+import { Notifacaciones } from "../../models/index.js";
 import { NotFountError } from "../errorsInstances.js";
 
 export const createNotifications = async (data) => {
