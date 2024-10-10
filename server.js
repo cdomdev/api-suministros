@@ -54,13 +54,11 @@ app.use((err, req, res, next) => {
 
 async function starServer() {
   try {
-    await conecction.sync({ force: true })
-
+    await conecction.sync()
 
     app.listen(port, () => {
       console.log(`El servidor se está ejecutando en el puerto ${port}`);
     });
-
 
   } catch (error) {
     console.log('Error al incializar las base de datos', error)
