@@ -4,7 +4,7 @@ import { Productos } from "./Productos.js";
 import { DetallesPedido } from "./detallesPedido.js";
 import { Inventario } from "./inventario.js";
 import { Invitado } from "./invitado.js";
-import { Notifcaciones } from "./notificaciones.js";
+import { Notifacaciones } from "./notificaciones.js";
 import { Ofertas } from "./ofertas.js";
 import { OfertasProductos } from "./ofertasProductos.js";
 import { Pedido } from "./pedido.js";
@@ -29,8 +29,8 @@ DetallesPedido.belongsTo(Productos, { foreignKey: "producto_id" });
 Productos.hasMany(DetallesPedido, { foreignKey: "producto_id" });
 
 // productos - categorias
-Productos.belongsTo(Categorias, { foreignKey: "categoria_id" });
-Categorias.hasMany(Productos, { foreignKey: "categoria_id" });
+Productos.belongsTo(Categorias, { foreignKey: 'categoria_id' });
+Categorias.hasMany(Productos, { foreignKey: 'categoria_id' });
 
 // productos - subcategorias
 Productos.belongsTo(Subcategorias, { foreignKey: "subcategoria_id" });
@@ -68,7 +68,7 @@ export {
   DetallesPedido,
   Inventario,
   Invitado,
-  Notifcaciones,
+  Notifacaciones,
   Ofertas,
   OfertasProductos,
   Pedido,

@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 import { conecction } from "../../database/conecction.js";
 
-export const Notifcaciones = conecction.define(
+export const Notifacaciones = conecction.define(
   "notificaciones",
   {
     id: {

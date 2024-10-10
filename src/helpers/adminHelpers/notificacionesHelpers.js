@@ -1,9 +1,9 @@
-import { Notifcaciones } from "../../models/index.js";
+import { Notifacaciones } from "../../models/index.js";
 import { NotFountError, MissingDataError } from '../../helpers/errorsInstances.js'
 
 export const getAllNotificaciones = async () => {
 
-    const notifications = await Notifcaciones.findAll({
+    const notifications = await Notifacaciones.findAll({
         where: {
             leido: false
         }
@@ -19,7 +19,7 @@ export const updateStateNotificaciones = async (id) => {
     if (!id) throw new MissingDataError('Se requiere de una id para actulizar el estado de la notificacion')
 
 
-    const [updateRead] = await Notifcaciones.update(
+    const [updateRead] = await Notifacaciones.update(
         { leido: true },
         { where: { id } }
     );
@@ -33,7 +33,7 @@ export const updateStateNotificaciones = async (id) => {
 
 export const allRead = async () => {
     // Actualiza todas las notificaciones marcándolas como leídas
-    const result = await Notifcaciones.update(
+    const result = await Notifacaciones.update(
         { leido: true },
         {
             where: { leido: false },
@@ -46,7 +46,7 @@ export const allRead = async () => {
 export const deleteNotification = async (id) => {
     if (!id) throw new MissingDataError('Se requiere de una id para eliminar una notificacion')
 
-    const deletedCount = await Notifcaciones.destroy({
+    const deletedCount = await Notifacaciones.destroy({
         where: { id },
     });
 
