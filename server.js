@@ -3,6 +3,9 @@ import cors from "cors";
 import morgan from "morgan";
 import path from "path";
 import cookieParser from "cookie-parser";
+import { routerUser } from "./src/routes/rutasUsers.js";
+import { routerAdmin } from "./src/routes/rutasAdmin.js";
+import { conecction } from "./database/conecction.js";
 
 const app = express();
 const port = process.env.PORT || 3100;
@@ -26,12 +29,13 @@ app.use(
   })
 );
 
+
+
 app.use(cookieParser());
 
-import { routerUser } from "./src/routes/rutasUsers.js";
-app.use("/", routerUser);
 
-import { routerAdmin } from "./src/routes/rutasAdmin.js";
+
+app.use("/", routerUser);
 app.use("/api", routerAdmin);
 
 // Direcciones estáticas
@@ -48,6 +52,19 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: "Error interno del servidor" });
 });
 
-app.listen(port, () => {
-  console.log(`El servidor se está ejecutando en el puerto ${port}`);
-});
+async function starServer() {
+  try {
+    await conecction.sync({ force: true })
+
+
+    app.listen(port, () => {
+      console.log(`El servidor se está ejecutando en el puerto ${port}`);
+    });
+
+
+  } catch (error) {
+    console.log('Error al incializar las base de datos', error)
+  }
+}
+
+starServer()
