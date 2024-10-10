@@ -1,6 +1,5 @@
 import { DataTypes } from "sequelize";
 import { conecction } from "../../database/conecction.js";
-import { Productos } from "./index.js";
 
 // modelo de las subcategorias
 export const Subcategorias = conecction.define(

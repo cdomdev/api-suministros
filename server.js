@@ -3,7 +3,6 @@ import cors from "cors";
 import morgan from "morgan";
 import path from "path";
 import cookieParser from "cookie-parser";
-import { fileURLToPath } from "url";
 
 const app = express();
 const port = process.env.PORT || 3100;

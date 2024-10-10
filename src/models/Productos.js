@@ -1,12 +1,6 @@
 import { DataTypes } from "sequelize";
 import { conecction } from "../../database/conecction.js";
-import {
-  DetallesPedido,
-  Inventario,
-  Subcategorias,
-  Categorias,
-  Ofertas,
-} from "./index.js";
+
 
 export const Productos = conecction.define(
   "Productos",

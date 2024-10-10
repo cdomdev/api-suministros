@@ -1,6 +1,5 @@
 import { DataTypes } from "sequelize";
 import { conecction } from "../../database/conecction.js";
-import { User } from "./user.js";
 
 export const Roles = conecction.define(
   "roles",

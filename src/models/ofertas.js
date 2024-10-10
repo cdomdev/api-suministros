@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 import { conecction } from "../../database/conecction.js";
-import { Productos } from "./index.js";
+
 // modelo de ofertas
 export const Ofertas = conecction.define(
   "ofertas",
